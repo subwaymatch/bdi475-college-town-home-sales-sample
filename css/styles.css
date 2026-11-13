@@ -9,14 +9,14 @@
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-head: "Source Serif 4", Georgia, "Times New Roman", serif;
 
-  --bg: #fbfaf7;
-  --surface: #fbfaf7;
-  --surface-2: #efede6;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f0ec;
   --overlay: #ffffff;
   --ink: #16181d;
   --ink-2: #4a4d55;
   --muted: #6d6e73;
-  --line: #e3e0d6;
+  --line: #e7e5df;
   --axis: #c5c2b7;
   --border: rgba(22, 24, 29, 0.12);
 
@@ -174,18 +174,10 @@ a {
   white-space: nowrap;
 }
 
-.brand-mark {
-  width: 26px;
-  height: 26px;
-  flex: none;
-}
-
-.brand-mark rect {
-  fill: var(--accent);
-}
-
-.brand-mark path {
-  fill: #fff;
+.brand .brand-mark {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.25;
 }
 
 .site-nav {
@@ -236,7 +228,7 @@ a {
   height: 16px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
   flex: none;
@@ -1137,12 +1129,12 @@ a {
 }
 
 .sort-icon {
-  width: 10px;
+  width: 14px;
   height: 14px;
   flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -1155,7 +1147,7 @@ a {
 .sort-btn.is-desc .sort-down {
   opacity: 1;
   stroke: var(--accent);
-  stroke-width: 2.4;
+  stroke-width: 3;
 }
 
 .sortable tbody tr:hover th,

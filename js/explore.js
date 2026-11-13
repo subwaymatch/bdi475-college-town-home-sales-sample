@@ -52,8 +52,9 @@ const LABEL_SIDE = {
   florida: 'right',
 };
 
+// Lucide "chevrons-up-down". The arrow for the active sort direction is highlighted in CSS.
 const SORT_ICON =
-  '<svg class="sort-icon" viewBox="0 0 12 16" aria-hidden="true"><path class="sort-up" d="M2.500 6.500 6 3l3.500 3.500"/><path class="sort-down" d="M2.500 9.500 6 13l3.500-3.500"/></svg>';
+  '<svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="sort-up" d="m7 9 5-5 5 5"/><path class="sort-down" d="m7 15 5 5 5-5"/></svg>';
 
 export function initExplore(rows, mapDataPromise) {
   const campuses = A.allCampuses(rows);

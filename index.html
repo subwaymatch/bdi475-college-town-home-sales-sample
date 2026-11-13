@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>College-Town Home Sales Analysis</title>
   <meta name="description" content="An analysis of home sales around university campuses: prices, days on market, property tax and distance to campus, by city and campus area.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23eb6834'/%3E%3Cpath d='M16 7 6 15.5h3V25h5.5v-6h3v6H23v-9.500h3z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316181d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cstyle%3E@media (prefers-color-scheme: dark)%7Bpath%7Bstroke:%23f0efec%7D%7D%3C/style%3E%3Cpath d='M13 17V9'/%3E%3Cpath d='M18 17V5'/%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E">
   <script>
     // Set the theme before the page paints, so there is no flash of the wrong mode.
     (function () {
@@ -26,7 +26,7 @@
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="#top">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M16 7 6 15.5h3V25h5.500v-6h3v6H23v-9.500h3z"/></svg>
+        <svg class="icon brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17v-3"/></svg>
         <span>College-Town Home Sales</span>
       </a>
       <nav class="site-nav" aria-label="Sections">
@@ -34,8 +34,8 @@
         <a href="#explore">Explore</a>
       </nav>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
-        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8 8 0 0 1 9.500 4a8 8 0 1 0 10.500 10.500z"/></svg>
-        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.500M12 19.500V22M2 12h2.500M19.500 12H22M4.900 4.900l1.800 1.800M17.300 17.300l1.800 1.800M4.900 19.100l1.800-1.800M17.300 6.700l1.800-1.800"/></svg>
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
         <span class="theme-toggle-label">Dark mode</span>
       </button>
     </div>
@@ -315,11 +315,11 @@
             <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
             <div class="filters-actions">
               <button class="btn btn--ghost" id="reset-filters" type="button">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.600-5.900M4 4v5h5"/></svg>
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 <span>Reset filters</span>
               </button>
               <button class="btn" id="copy-link" type="button">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 <span class="btn-label">Copy link to this view</span>
               </button>
             </div>
