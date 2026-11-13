@@ -44,3 +44,28 @@ A dated entry for each time I worked with the coding agent (Claude Code on the w
 - **Agent produced:** Buttons and form controls with a 6px corner radius. On its own review of phone and dark-mode screenshots, the agent also changed how bar charts fit a narrow screen, kept chart labels readable where they cross gridlines, made the written answer stay in view beside a tall chart on wide screens, highlighted the current section in the top bar, and added links to the footer.
 - **Checked or changed:** The agent re-ran its number checks against pandas, its screen-width check at six widths, and a test that hovers over the marks of every chart.
 - **What the agent got wrong:** Tooltips did not appear when the pointer was directly on a bar or dot, only on the empty space beside it, because the marks were drawn on top of the invisible hover areas. The agent found this when its hover test timed out, and fixed it so marks and labels let the pointer through.
+
+## 2026-11-13: Small fixes after the first release
+
+- **Asked:** "Increase the font size of p.eyebrow to 16px (in desktop view, change other responsive sizes accordingly)."
+- **Asked:** "Clicking on the city name inside the geographic map should also select the city. Currently, only the circle selects the city." and "Can you update the range slider so that clicking on the rail also adjusts either the starting or ending point? [...] Come up with how to determine whether the starting point or ending point should be adjusted."
+- **Asked:** "In the data and methods section, use a single column layout instead of three columns. Multiple columns make it difficult to read. Increase the text font size in this section." and later "Can you make the font size in "Data and methods" match those in "Insights"?"
+- **Asked:** "Can you also make the drag (circle) slightly smaller in the range slider, and make the thickness of the circle border match the rail's thickness?" and "Let's remove the chart icon from the site title. Just left-align the text to align with other sections."
+- **Agent produced:** Larger section labels, campus names on the map that select like their circles, slider rails that move the nearer handle when clicked (the end handle on an exact tie), smaller slider handles, a one-column Data and methods section, and a text-only site title.
+- **Checked or changed:** The agent clicked every campus name on desktop and phone, and clicked, tapped and dragged the slider rail at five positions.
+- **What the agent got wrong:** A click exactly halfway between the two slider handles moved the start handle instead of the end handle, because of decimal rounding. The agent's own test caught it.
+
+## 2026-11-13: Audit fixes (header, map, menus, tables, link previews)
+
+- **Asked:** "This is an audit result by Claude Cowork. Can you please check it, and implement any suggestions for improvements for the items you identify as valid?" (with the audit attached as a file)
+- **Agent produced:** It tested each of the audit's claims in a browser before changing anything, then fixed the ones that held up:
+  - The header no longer causes sideways scrolling. From 561 to 724 pixels wide, the full header was wider than the screen. Screens up to 760 pixels wide now get a one-row header with a menu button for the four section links.
+  - On the map, markers that overlapped (Illinois and Purdue) are moved apart with a thin line back to the true location, every marker has a click target at least 24 pixels across, and every campus has a label on desktop and phone.
+  - The comparison menus use short campus names, so no name is cut off.
+  - Days on market shows "25" and "7" in tables, not "25.0" and "7.0", and keeps "23.5".
+  - The page has link-preview tags and a preview image.
+- **Checked or changed:** The agent did not follow two of the audit's suggestions as written:
+  - The audit said the Explore charts and the map show nothing on hover. They do: hovering and tapping both showed the right numbers in the agent's tests, so nothing was changed.
+  - The audit suggested removing bedroom counts with fewer than 10 sales from the Q7 menu. The agent kept every count, because graders may choose any setting, and listed the rare ones in their own group with their number of sales.
+- **Checked or changed:** All the Q1 to Q10 and P1 values on the audit's checklist are unchanged. No calculation in `js/analysis.js` was touched.
+- **What the agent got wrong:** The sideways scrolling was the agent's own miss. Its earlier screen-width check tested 320, 360, 390, 768, 1024 and 1280 pixels and skipped everything between 390 and 768. Its first version of the new map layout also showed no labels at all on a phone, because one long name ("UNC Chapel Hill") had no free spot and the search gave up. The agent added more label positions, a shorter name ("UNC") on small maps and a fallback.
