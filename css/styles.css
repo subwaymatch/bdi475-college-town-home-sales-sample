@@ -143,7 +143,7 @@ a {
 }
 
 .eyebrow {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--accent-ink);
 }
@@ -1571,6 +1571,10 @@ a {
 /* ---------- Smaller screens ---------- */
 
 @media (max-width: 760px) {
+  .eyebrow {
+    font-size: 0.9375rem;
+  }
+
   .hero {
     padding: 56px 0 16px;
   }
@@ -1629,6 +1633,10 @@ a {
 }
 
 @media (max-width: 560px) {
+  .eyebrow {
+    font-size: 0.875rem;
+  }
+
   .wrap {
     padding: 0 16px;
   }
