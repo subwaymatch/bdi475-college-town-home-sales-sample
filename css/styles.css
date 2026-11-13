@@ -781,6 +781,8 @@ a {
 /* Two-handle range slider */
 
 .range-slider {
+  /* Handle size, shared with the rail inset below and read by js/controls.js. */
+  --thumb: 18px;
   position: relative;
   height: 28px;
   margin-top: 8px;
@@ -792,11 +794,11 @@ a {
   touch-action: pan-y;
 }
 
-/* Inset by half a handle (11px), so the blue fill ends under the center of each handle. */
+/* Inset by half a handle, so the blue fill ends under the center of each handle. */
 .range-track {
   position: absolute;
-  left: 11px;
-  right: 11px;
+  left: calc(var(--thumb) / 2);
+  right: calc(var(--thumb) / 2);
   top: 50%;
   height: 4px;
   transform: translateY(-50%);
@@ -838,10 +840,12 @@ a {
 
 .range-slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  margin-top: 3px;
-  border: 2px solid var(--accent-2);
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((28px - var(--thumb)) / 2);
+  /* The ring is as thick as the rail (4px). */
+  border: 4px solid var(--accent-2);
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -851,9 +855,10 @@ a {
 }
 
 .range-slider input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--accent-2);
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 4px solid var(--accent-2);
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);

@@ -143,7 +143,9 @@ export function rangeControl(root, { min, max, step, lo, hi, onChange }) {
   //   - a click exactly halfway between them moves the end.
   // The handles themselves still drag as normal.
   const rail = root.querySelector('.range-slider');
-  const HANDLE = 22; // handle width in pixels; its center travels from 11px to width - 11px
+  // Handle width in pixels, from the --thumb setting in styles.css. Its center travels from
+  // half a handle in from the left edge to half a handle in from the right edge.
+  const HANDLE = parseFloat(getComputedStyle(rail).getPropertyValue('--thumb')) || 18;
 
   function valueAt(clientX) {
     const box = rail.getBoundingClientRect();
