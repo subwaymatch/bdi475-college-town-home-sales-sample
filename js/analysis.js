@@ -346,3 +346,97 @@ export function q10(rows, campus, budget, minBeds) {
   const miles = sortedCopy(matches.map((r) => r.miles));
   return { n: miles.length, median: quantileSorted(miles, 0.5), miles, hi };
 }
+
+// ---------- Explore section: filters and summaries ----------
+
+// Home feature filters. A blank cell means "not reported", which is its own choice, not "no".
+export function featureMatches(value, choice) {
+  if (choice === 'yes') return value === 1;
+  if (choice === 'no') return value === 0;
+  if (choice === 'unknown') return value == null;
+  return true;
+}
+
+// Returns the sales that match the Explore filters. The price rule always applies.
+// A range filter left at its full extent (null) keeps rows where that value is missing;
+// once a range is narrowed, rows missing that value are left out.
+export function filterSales(rows, f, { ignoreLocation = false } = {}) {
+  const { lo, hi } = clampPriceRange(f.priceMin, f.priceMax);
+  return rows.filter((r) => {
+    if (!r.valid || r.price < lo || r.price > hi) return false;
+    if (!ignoreLocation) {
+      if (f.campus && r.campus !== f.campus) return false;
+      if (f.city && r.city !== f.city) return false;
+    }
+    if (f.year != null && r.year !== f.year) return false;
+    if (f.beds != null) {
+      if (r.beds == null) return false;
+      if (f.beds >= 6 ? r.beds < 6 : r.beds !== f.beds) return false;
+    }
+    if (f.milesMin != null && (r.miles == null || r.miles < f.milesMin)) return false;
+    if (f.milesMax != null && (r.miles == null || r.miles > f.milesMax)) return false;
+    if (f.builtMin != null && (r.built == null || r.built < f.builtMin)) return false;
+    if (f.builtMax != null && (r.built == null || r.built > f.builtMax)) return false;
+    return featureMatches(r.garage, f.garage) && featureMatches(r.basement, f.basement) && featureMatches(r.fireplace, f.fireplace);
+  });
+}
+
+// Key numbers for a list of sales.
+export function summarize(list) {
+  const dom = list.filter((r) => r.dom != null).map((r) => r.dom);
+  // Price per square foot needs a living area above zero (some rows are blank or 0).
+  const ppsf = list.filter((r) => r.sqft != null && r.sqft > 0).map((r) => r.price / r.sqft);
+  const miles = list.filter((r) => r.miles != null).map((r) => r.miles);
+  return {
+    n: list.length,
+    medianPrice: list.length ? median(list.map((r) => r.price)) : null,
+    medianDom: dom.length ? median(dom) : null,
+    nDom: dom.length,
+    medianPpsf: ppsf.length ? median(ppsf) : null,
+    nPpsf: ppsf.length,
+    medianMiles: miles.length ? median(miles) : null,
+  };
+}
+
+// Every month from the first sale to the last, as 'YYYY-MM' keys.
+export function monthKeys(rows) {
+  const dates = rows.filter((r) => r.sale).map((r) => r.sale).sort();
+  if (!dates.length) return [];
+  let year = Number(dates[0].slice(0, 4));
+  let month = Number(dates[0].slice(5, 7));
+  const endYear = Number(dates[dates.length - 1].slice(0, 4));
+  const endMonth = Number(dates[dates.length - 1].slice(5, 7));
+  const keys = [];
+  while (year < endYear || (year === endYear && month <= endMonth)) {
+    keys.push(`${year}-${String(month).padStart(2, '0')}`);
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+  return keys;
+}
+
+// Median sale price and number of sales for each month.
+export function monthlyMedians(list, keys) {
+  const groups = groupBy(list.filter((r) => r.sale), (r) => r.sale.slice(0, 7));
+  return keys.map((key) => {
+    const sales = groups.get(key) || [];
+    return {
+      key,
+      year: Number(key.slice(0, 4)),
+      month: Number(key.slice(5, 7)),
+      n: sales.length,
+      median: sales.length ? median(sales.map((r) => r.price)) : null,
+    };
+  });
+}
+
+// The median latitude and longitude of a list of sales: where a place sits on the map.
+export function medianLocation(list) {
+  return {
+    lat: median(list.filter((r) => r.lat != null).map((r) => r.lat)),
+    lon: median(list.filter((r) => r.lon != null).map((r) => r.lon)),
+  };
+}

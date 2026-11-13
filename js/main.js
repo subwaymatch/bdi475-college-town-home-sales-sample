@@ -5,9 +5,11 @@ import * as F from './format.js';
 import { redrawAll } from './charts.js';
 import { renderFixedQuestions } from './questions.js';
 import { renderLiveQuestions } from './questions-live.js';
+import { initExplore } from './explore.js';
 
 const d3 = window.d3;
 const DATA_URL = 'data/site_sales.csv';
+const MAP_URL = 'vendor/us-states-10m.json';
 
 // ---------- Light and dark mode ----------
 
@@ -54,11 +56,27 @@ function renderOverview(rows) {
   });
 }
 
+// ---------- Map outlines ----------
+
+// US state shapes for the Explore map. Loaded alongside the sales data.
+async function loadMap() {
+  const response = await fetch(MAP_URL);
+  if (!response.ok) throw new Error('The map file could not be loaded.');
+  const us = await response.json();
+  const topojson = window.topojson;
+  return {
+    states: topojson.feature(us, us.objects.states),
+    borders: topojson.mesh(us, us.objects.states, (a, b) => a !== b),
+  };
+}
+
 // ---------- Start ----------
 
 async function start() {
   initTheme();
   const status = document.getElementById('load-status');
+  const mapData = loadMap();
+  mapData.catch(() => {});
   try {
     const response = await fetch(DATA_URL);
     if (!response.ok) throw new Error(`The data file could not be loaded (status ${response.status}).`);
@@ -71,6 +89,7 @@ async function start() {
     renderOverview(rows);
     renderFixedQuestions(rows);
     renderLiveQuestions(rows);
+    initExplore(rows, mapData);
     document.fonts.ready.then(redrawAll);
   } catch (err) {
     console.error(err);

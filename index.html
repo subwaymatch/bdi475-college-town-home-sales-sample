@@ -31,6 +31,7 @@
       </a>
       <nav class="site-nav" aria-label="Sections">
         <a href="#questions">Questions</a>
+        <a href="#explore">Explore</a>
       </nav>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
         <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8 8 0 0 1 9.500 4a8 8 0 1 0 10.500 10.500z"/></svg>
@@ -68,7 +69,7 @@
     <section class="section" id="questions" data-needs-data hidden>
       <div class="wrap">
         <header class="section-head">
-          <p class="eyebrow">Part 1</p>
+          <p class="eyebrow">The analysis</p>
           <h2>Ten questions</h2>
           <p class="section-intro">Questions 1 to 6 always use the full dataset. Questions 7 to 10 have their own settings, and their answers and charts update as you change them. Unless a question says otherwise, prices are limited to sales from $10,000 to $5,000,000, a "city" is a city and state together, and a "campus area" is the nearest university.</p>
           <nav class="jump" aria-label="Jump to a question">
@@ -234,6 +235,148 @@
         </article>
       </div>
     </section>
+    <section class="section section--alt" id="explore" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Interactive</p>
+          <h2>Explore the sales</h2>
+          <p class="section-intro">Set the filters and everything in this section updates together: the key numbers, the map, the charts, the comparison and the table. The ten questions above are not affected. This section always uses sales from $10,000 to $5,000,000.</p>
+        </header>
+
+        <div class="panel filters" id="filters">
+          <h3 class="panel-title">Filters</h3>
+          <div class="filters-grid">
+            <div class="field field--span2">
+              <label for="f-campus">Campus area</label>
+              <select class="select" id="f-campus"></select>
+            </div>
+            <div class="field field--span2">
+              <label for="f-city">City</label>
+              <select class="select" id="f-city"></select>
+            </div>
+            <div class="field">
+              <label for="f-year">Year of sale</label>
+              <select class="select" id="f-year"></select>
+            </div>
+            <div class="field">
+              <label for="f-beds">Bedrooms</label>
+              <select class="select" id="f-beds"></select>
+            </div>
+            <div class="field">
+              <label for="f-pmin">Minimum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="f-pmin" type="text" inputmode="numeric" autocomplete="off" placeholder="10,000"></div>
+            </div>
+            <div class="field">
+              <label for="f-pmax">Maximum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="f-pmax" type="text" inputmode="numeric" autocomplete="off" placeholder="5,000,000"></div>
+            </div>
+            <div class="field">
+              <label for="f-garage">Garage</label>
+              <select class="select" id="f-garage"></select>
+            </div>
+            <div class="field">
+              <label for="f-basement">Basement</label>
+              <select class="select" id="f-basement"></select>
+            </div>
+            <div class="field">
+              <label for="f-fireplace">Fireplace</label>
+              <select class="select" id="f-fireplace"></select>
+            </div>
+          </div>
+          <div class="filters-ranges">
+            <div class="range" id="f-miles" role="group" aria-label="Distance from campus, in miles">
+              <p class="field-label">Distance from campus, in miles</p>
+              <div class="range-slider">
+                <div class="range-track"><div class="range-fill"></div></div>
+                <input class="range-lo" type="range" aria-label="Minimum distance in miles">
+                <input class="range-hi" type="range" aria-label="Maximum distance in miles">
+              </div>
+              <div class="range-boxes">
+                <input class="input range-box-lo" type="number" inputmode="decimal" aria-label="Minimum distance in miles, exact">
+                <span>to</span>
+                <input class="input range-box-hi" type="number" inputmode="decimal" aria-label="Maximum distance in miles, exact">
+              </div>
+            </div>
+            <div class="range" id="f-built" role="group" aria-label="Year built">
+              <p class="field-label">Year built</p>
+              <div class="range-slider">
+                <div class="range-track"><div class="range-fill"></div></div>
+                <input class="range-lo" type="range" aria-label="Minimum year built">
+                <input class="range-hi" type="range" aria-label="Maximum year built">
+              </div>
+              <div class="range-boxes">
+                <input class="input range-box-lo" type="number" inputmode="decimal" aria-label="Minimum year built, exact">
+                <span>to</span>
+                <input class="input range-box-hi" type="number" inputmode="decimal" aria-label="Maximum year built, exact">
+              </div>
+            </div>
+          </div>
+          <div class="filters-foot">
+            <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
+            <div class="filters-actions">
+              <button class="btn btn--ghost" id="reset-filters" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.600-5.900M4 4v5h5"/></svg>
+                <span>Reset filters</span>
+              </button>
+              <button class="btn" id="copy-link" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>
+                <span class="btn-label">Copy link to this view</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-banner" id="explore-empty" hidden>
+          <div>
+            <p class="empty-title">No sales match these filters</p>
+            <p>Try widening a range or choosing "Any", or start again.</p>
+          </div>
+          <button class="btn" id="empty-reset" type="button">Reset filters</button>
+        </div>
+
+        <div class="tiles" aria-live="polite">
+          <div class="tile"><p class="tile-label">Sales</p><p class="tile-value" id="tile-n"></p><p class="tile-note" id="tile-n-note"></p></div>
+          <div class="tile"><p class="tile-label">Median sale price</p><p class="tile-value" id="tile-price"></p><p class="tile-note" id="tile-price-note"></p></div>
+          <div class="tile"><p class="tile-label">Median days on market</p><p class="tile-value" id="tile-dom"></p><p class="tile-note" id="tile-dom-note"></p></div>
+          <div class="tile"><p class="tile-label">Median price per square foot</p><p class="tile-value" id="tile-ppsf"></p><p class="tile-note" id="tile-ppsf-note"></p></div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="panel panel--wide"><figure id="map-figure"></figure></div>
+          <div class="panel panel--side" id="compare">
+            <h3 class="panel-title">Compare two places</h3>
+            <p class="panel-sub">Choose any two campus areas or cities.</p>
+            <div class="cmp-pickers">
+              <div class="field">
+                <label for="cmp-a">First place</label>
+                <select class="select" id="cmp-a"></select>
+              </div>
+              <div class="field">
+                <label for="cmp-b">Second place</label>
+                <select class="select" id="cmp-b"></select>
+              </div>
+            </div>
+            <div class="cmp" id="compare-result" aria-live="polite"></div>
+            <p class="panel-note" id="compare-note"></p>
+          </div>
+          <div class="panel panel--wide"><figure id="trend-figure"></figure></div>
+          <div class="panel panel--side"><figure id="dist-figure"></figure></div>
+          <div class="panel panel--full">
+            <div class="panel-head">
+              <div>
+                <h3 class="panel-title">Results by place</h3>
+                <p class="panel-sub" id="table-caption"></p>
+              </div>
+              <div class="segmented" role="group" aria-label="Rows of the table">
+                <button type="button" data-table-by="city" aria-pressed="true">Cities</button>
+                <button type="button" data-table-by="campus" aria-pressed="false">Campus areas</button>
+              </div>
+            </div>
+            <div id="explore-table"></div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -243,6 +386,7 @@
   </footer>
 
   <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

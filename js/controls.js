@@ -73,3 +73,74 @@ export function numberInput(input, initial, onChange) {
   input.addEventListener('change', () => onChange(read()));
   return { set: (value) => (input.value = value == null ? '' : String(value)) };
 }
+
+// A range filter with two slider handles and two number boxes that stay in sync.
+// Dragging gives a rough range; typing gives an exact one.
+export function rangeControl(root, { min, max, step, lo, hi, onChange }) {
+  const sliderLo = root.querySelector('.range-lo');
+  const sliderHi = root.querySelector('.range-hi');
+  const boxLo = root.querySelector('.range-box-lo');
+  const boxHi = root.querySelector('.range-box-hi');
+  const fill = root.querySelector('.range-fill');
+  const decimals = (String(step).split('.')[1] || '').length;
+  const snap = (value) => Number((Math.round(value / step) * step).toFixed(decimals));
+  const clamp = (value) => Math.min(max, Math.max(min, snap(value)));
+
+  for (const input of [sliderLo, sliderHi, boxLo, boxHi]) {
+    input.min = String(min);
+    input.max = String(max);
+    input.step = String(step);
+  }
+
+  function paint() {
+    sliderLo.value = String(lo);
+    sliderHi.value = String(hi);
+    boxLo.value = String(lo);
+    boxHi.value = String(hi);
+    const span = max - min || 1;
+    fill.style.left = `${((lo - min) / span) * 100}%`;
+    fill.style.right = `${((max - hi) / span) * 100}%`;
+    // When both handles sit at the top end, the lower one must stay reachable.
+    sliderLo.style.zIndex = lo > min + span / 2 ? '3' : '2';
+  }
+
+  const emit = debounce(() => onChange(lo, hi), 120);
+
+  sliderLo.addEventListener('input', () => {
+    lo = Math.min(clamp(Number(sliderLo.value)), hi);
+    paint();
+    emit();
+  });
+  sliderHi.addEventListener('input', () => {
+    hi = Math.max(clamp(Number(sliderHi.value)), lo);
+    paint();
+    emit();
+  });
+  // Number boxes apply when the visitor finishes typing (Enter, Tab or clicking away).
+  boxLo.addEventListener('change', () => {
+    const value = boxLo.value.trim() === '' ? min : Number(boxLo.value);
+    lo = Math.min(clamp(Number.isFinite(value) ? value : min), hi);
+    paint();
+    onChange(lo, hi);
+  });
+  boxHi.addEventListener('change', () => {
+    const value = boxHi.value.trim() === '' ? max : Number(boxHi.value);
+    hi = Math.max(clamp(Number.isFinite(value) ? value : max), lo);
+    paint();
+    onChange(lo, hi);
+  });
+  for (const box of [boxLo, boxHi]) {
+    box.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Enter') box.blur();
+    });
+  }
+
+  paint();
+  return {
+    set(newLo, newHi) {
+      lo = clamp(newLo);
+      hi = Math.max(clamp(newHi), lo);
+      paint();
+    },
+  };
+}

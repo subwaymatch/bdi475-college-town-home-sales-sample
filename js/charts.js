@@ -494,11 +494,14 @@ export function slope(body, width, o) {
   const narrow = width < 520;
   const font = narrow ? `500 12px ${FONT}` : F_LABEL;
   const fontKey = narrow ? `700 12px ${FONT}` : F_LABEL_KEY;
-  const labelText = (r, rank) => `${rank}. ${r.label}`;
-  const sideW = Math.min(
-    maxWidth(rows, (r) => labelText(r, Math.max(r.left, r.right)), (r) => (r.cls && r.cls !== 'quiet' ? fontKey : font)) + 16,
-    Math.floor(width * 0.38)
-  );
+  const fontFor = (r) => (r.cls && r.cls !== 'quiet' ? fontKey : font);
+  let labelText = (r, rank) => `${rank}. ${r.label}`;
+  let sideW = maxWidth(rows, (r) => labelText(r, Math.max(r.left, r.right)), fontFor) + 16;
+  // On a very small screen the full labels leave no room for the lines, so the short labels are used.
+  if (width - 2 * sideW < 44 && rows.some((r) => r.shortLabel)) {
+    labelText = (r, rank) => `${rank}. ${r.shortLabel || r.label}`;
+    sideW = maxWidth(rows, (r) => labelText(r, Math.max(r.left, r.right)), fontFor) + 16;
+  }
   const rowH = 28;
   const top = 34;
   const n = d3.max(rows, (r) => Math.max(r.left, r.right));
@@ -707,4 +710,188 @@ export function histogram(body, width, o) {
       .attr('text-anchor', flip ? 'end' : 'start')
       .text(o.marker.label);
   }
+}
+
+// ---------- Line chart: one value per month ----------
+
+// o.points: [{key, label, value (or null for a gap), tick (axis label or null), tip}]
+export function line(body, width, o) {
+  const points = o.points;
+  const height = o.height || 300;
+  const defined = points.filter((p) => p.value != null);
+  const [lo, hi] = d3.extent(defined, (p) => p.value);
+  const pad = (hi - lo) * 0.12 || hi * 0.1 || 1;
+  const y = d3.scaleLinear().domain([Math.max(0, lo - pad), hi + pad]).nice(4);
+  const yTicks = y.ticks(4);
+  const left = maxWidth(yTicks, (t) => o.yFormat(t), F_TICK) + 10;
+  const last = defined[defined.length - 1];
+  const endLabel = o.endLabel ? o.endLabel(last) : '';
+  const right = width - Math.max(12, Math.min(textWidth(endLabel, F_VALUE) + 12, 90));
+  const top = 30;
+  const bottom = height - (o.xTitle ? 50 : 28);
+  y.range([bottom, top]);
+  const x = d3.scaleLinear().domain([0, Math.max(1, points.length - 1)]).range([left + 6, right]);
+
+  const svg = startSvg(body, width, height, o.ariaLabel);
+  const axis = svg.append('g').attr('class', 'axis');
+  axis
+    .selectAll('line')
+    .data(yTicks)
+    .join('line')
+    .attr('class', 'grid')
+    .attr('x1', left)
+    .attr('x2', right)
+    .attr('y1', (d) => Math.round(y(d)) + 0.5)
+    .attr('y2', (d) => Math.round(y(d)) + 0.5);
+  axis
+    .selectAll('text.ytick')
+    .data(yTicks)
+    .join('text')
+    .attr('class', 'tick')
+    .attr('x', left - 8)
+    .attr('y', (d) => y(d))
+    .attr('text-anchor', 'end')
+    .attr('dominant-baseline', 'central')
+    .text((d) => o.yFormat(d));
+  if (o.yTitle) axis.append('text').attr('class', 'axis-title').attr('x', 0).attr('y', 12).text(o.yTitle);
+  const ticks = points.map((p, i) => ({ ...p, i })).filter((p) => p.tick);
+  axis
+    .selectAll('line.xtick')
+    .data(ticks)
+    .join('line')
+    .attr('class', 'baseline')
+    .attr('x1', (p) => x(p.i))
+    .attr('x2', (p) => x(p.i))
+    .attr('y1', bottom)
+    .attr('y2', bottom + 5);
+  axis
+    .selectAll('text.xtick')
+    .data(ticks)
+    .join('text')
+    .attr('class', 'tick')
+    .attr('x', (p) => x(p.i))
+    .attr('y', bottom + 20)
+    .attr('text-anchor', 'middle')
+    .text((p) => p.tick);
+  if (o.xTitle) {
+    axis.append('text').attr('class', 'axis-title').attr('x', (left + right) / 2).attr('y', bottom + 42).attr('text-anchor', 'middle').text(o.xTitle);
+  }
+  svg.append('line').attr('class', 'baseline').attr('x1', left).attr('x2', right).attr('y1', bottom + 0.5).attr('y2', bottom + 0.5);
+
+  const path = d3
+    .line()
+    .defined((p) => p.value != null)
+    .x((p, i) => x(i))
+    .y((p) => y(p.value));
+  svg.append('path').attr('class', `line-path is-${o.cls || 'accent2'}`).attr('d', path(points));
+  // Months that stand alone (a gap on both sides) would be invisible as a line, so they get a dot.
+  points.forEach((p, i) => {
+    const alone = p.value != null && (points[i - 1]?.value ?? null) == null && (points[i + 1]?.value ?? null) == null;
+    if (alone) svg.append('circle').attr('class', `dot is-${o.cls || 'accent2'}`).attr('cx', x(i)).attr('cy', y(p.value)).attr('r', 3.5);
+  });
+  if (last) {
+    const li = points.indexOf(last);
+    svg.append('circle').attr('class', `dot is-${o.cls || 'accent2'}`).attr('cx', x(li)).attr('cy', y(last.value)).attr('r', 5);
+    if (endLabel) {
+      svg.append('text').attr('class', 'value-label is-key').attr('x', x(li) + 10).attr('y', y(last.value)).attr('dominant-baseline', 'central').text(endLabel);
+    }
+  }
+
+  // Crosshair: the pointer only has to be near a month, not on the line.
+  const cross = svg.append('g').attr('class', 'crosshair').style('display', 'none');
+  cross.append('line').attr('class', 'cross-line').attr('y1', top).attr('y2', bottom);
+  cross.append('circle').attr('class', `dot is-${o.cls || 'accent2'}`).attr('r', 5);
+  const overlay = svg
+    .append('rect')
+    .attr('class', 'overlay')
+    .attr('data-tip', '')
+    .attr('x', left)
+    .attr('y', top)
+    .attr('width', Math.max(0, right - left))
+    .attr('height', bottom - top);
+  function nearest(evt) {
+    const [px] = d3.pointer(evt, svg.node());
+    let best = null;
+    points.forEach((p, i) => {
+      if (p.value == null) return;
+      const dist = Math.abs(x(i) - px);
+      if (!best || dist < best.dist) best = { p, i, dist };
+    });
+    return best;
+  }
+  function show(evt) {
+    const hit = nearest(evt);
+    if (!hit) return;
+    cross.style('display', null);
+    cross.select('line').attr('x1', x(hit.i)).attr('x2', x(hit.i));
+    cross.select('circle').attr('cx', x(hit.i)).attr('cy', y(hit.p.value));
+    tooltip.show(evt, hit.p.tip);
+  }
+  overlay
+    .on('pointerenter', show)
+    .on('pointermove', show)
+    .on('pointerdown', show)
+    .on('pointerleave', (evt) => {
+      if (evt.pointerType === 'touch') return;
+      cross.style('display', 'none');
+      tooltip.hide();
+    });
+}
+
+// ---------- Map of campus areas ----------
+
+// o.states: GeoJSON of US states. o.borders: mesh of state borders.
+// o.places: [{key, label, lon, lat, n, selected, tip, labelSide}]. o.onSelect(key).
+export function campusMap(body, width, o) {
+  const height = Math.round(width * 0.62);
+  const small = width < 520;
+  const projection = d3.geoAlbersUsa().fitExtent(
+    [
+      [4, 4],
+      [width - 4, height - 4],
+    ],
+    o.states
+  );
+  const geo = d3.geoPath(projection);
+  const svg = startSvg(body, width, height, o.ariaLabel);
+  svg.append('path').attr('class', 'map-land').attr('d', geo(o.states));
+  svg.append('path').attr('class', 'map-borders').attr('d', geo(o.borders));
+
+  const maxN = d3.max(o.places, (p) => p.n) || 1;
+  const radius = d3.scaleSqrt().domain([0, maxN]).range([small ? 3.5 : 5, small ? 9 : 15]);
+  const placed = o.places
+    .map((p) => ({ ...p, xy: projection([p.lon, p.lat]) }))
+    .filter((p) => p.xy)
+    .sort((a, b) => b.n - a.n);
+
+  const groups = svg
+    .append('g')
+    .selectAll('g')
+    .data(placed)
+    .join('g')
+    .attr('class', (p) => `map-place${p.selected ? ' is-selected' : ''}${p.n ? '' : ' is-empty'}${o.anySelected && !p.selected ? ' is-dimmed' : ''}`)
+    .attr('transform', (p) => `translate(${p.xy[0]},${p.xy[1]})`);
+  groups.append('circle').attr('class', 'map-dot').attr('r', (p) => (p.n ? radius(p.n) : small ? 4 : 5));
+  groups
+    .append('text')
+    .attr('class', `map-label${small ? ' is-small' : ''}`)
+    .each(function (p) {
+      const r = (p.n ? radius(p.n) : 5) + (small ? 3 : 5);
+      const labelW = textWidth(p.label, small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`);
+      // A label that would run off the right edge of the map moves to the left of its marker.
+      let side = p.labelSide || 'right';
+      if (side === 'right' && p.xy[0] + r + labelW > width - 2) side = 'left';
+      const text = d3.select(this).text(p.label);
+      if (side === 'left') text.attr('x', -r).attr('text-anchor', 'end').attr('dominant-baseline', 'central');
+      else if (side === 'top') text.attr('y', -r - 2).attr('text-anchor', 'middle');
+      else if (side === 'bottom') text.attr('y', r + 10).attr('text-anchor', 'middle');
+      else text.attr('x', r).attr('text-anchor', 'start').attr('dominant-baseline', 'central');
+    });
+  // A generous invisible circle makes each campus easy to tap.
+  const hits = groups
+    .append('circle')
+    .attr('class', 'map-hit')
+    .attr('r', (p) => Math.max(radius(p.n) + 4, small ? 11 : 14))
+    .on('click', (evt, p) => o.onSelect(p.key));
+  attachTip(hits, (p) => p.tip);
 }

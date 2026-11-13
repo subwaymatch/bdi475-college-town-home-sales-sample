@@ -4,7 +4,9 @@ These files are copied into the repository, unchanged, so the site does not depe
 
 | File | What it is | Version | License |
 |---|---|---|---|
-| `d3.min.js` | [D3](https://d3js.org), used to draw the charts | 7.9.2 | ISC, Copyright 2010-2026 Mike Bostock |
+| `d3.min.js` | [D3](https://d3js.org), used to draw the charts and the map | 7.9.2 | ISC, Copyright 2010-2026 Mike Bostock |
+| `topojson-client.min.js` | [TopoJSON Client](https://github.com/topojson/topojson-client), reads the map file | 3.1.0 | ISC, Copyright 2012-2019 Michael Bostock |
+| `us-states-10m.json` | US state outlines from [us-atlas](https://github.com/topojson/us-atlas) (`states-10m.json`), based on US Census Bureau cartographic boundary files | 3.0.1 | ISC, Copyright 2013-2019 Michael Bostock |
 
 ISC License: Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 

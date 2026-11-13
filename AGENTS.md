@@ -12,3 +12,7 @@ Rules:
 - After each change, tell me what you changed and how I can check it in my browser, on the live site or in the pull request. I don't install tools, run code or start a local server on my own computer, so don't ask me to.
 - Never put passwords, API keys or other secrets in any file.
 - .github/workflows/pages.yml publishes the repository's files to GitHub Pages, as they are, each time main is pushed. Only add a build step to it if we move to a framework that needs one.
+
+Style preferences:
+- Write small labels, kickers and subtitles in normal sentence case, never in all caps (for example "Answer", not "ANSWER").
+- Don't add extra letter spacing to normal-case text.

@@ -174,6 +174,8 @@ function renderQ3(rows) {
   });
   const chartRows = cities.map((c) => ({
     label: c.city,
+    // City name without the state, for very small screens. Every city name in the data is unique.
+    shortLabel: c.city.replace(/, [A-Z]{2}$/, ''),
     left: c.rankAll,
     right: c.rankValid,
     cls: c.moved < 0 ? 'accent' : c.moved > 0 ? 'accent2' : 'quiet',
