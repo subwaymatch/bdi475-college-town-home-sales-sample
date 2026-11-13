@@ -786,10 +786,17 @@ a {
   margin-top: 8px;
 }
 
+.range-slider {
+  cursor: pointer;
+  /* Sideways drags on the rail move a handle; up-and-down swipes still scroll the page. */
+  touch-action: pan-y;
+}
+
+/* Inset by half a handle (11px), so the blue fill ends under the center of each handle. */
 .range-track {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 11px;
+  right: 11px;
   top: 50%;
   height: 4px;
   transform: translateY(-50%);
@@ -944,6 +951,7 @@ a {
 .map-label.is-small { font-size: 10.5px; }
 .map-place.is-selected .map-label { fill: var(--ink); font-weight: 600; }
 .map-hit { fill: transparent; cursor: pointer; }
+.map-place:hover .map-label { fill: var(--ink); }
 
 .map-loading {
   padding: 40px 0;

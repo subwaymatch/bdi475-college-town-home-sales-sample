@@ -909,7 +909,12 @@ export function campusMap(body, width, o) {
       if (box.x0 < 0 || box.x1 > width || box.y0 < 0 || box.y1 > height) return false;
       return !taken.some((other) => other.owner !== p.key && overlaps(box, other));
     });
-    if (p.side) taken.push({ ...boxes[p.side], owner: p.key });
+    if (p.side) {
+      taken.push({ ...boxes[p.side], owner: p.key });
+      // Remember where the label sits relative to its marker, for the label's own click area.
+      const b = boxes[p.side];
+      p.labelBox = { x: b.x0 - cx, y: b.y0 - cy, w: b.x1 - b.x0, h: b.y1 - b.y0 };
+    }
   }
   groups
     .filter((p) => p.side)
@@ -930,4 +935,17 @@ export function campusMap(body, width, o) {
     .attr('r', (p) => Math.max(radius(p.n) + 4, small ? 11 : 14))
     .on('click', (evt, p) => o.onSelect(p.key));
   attachTip(hits, (p) => p.tip);
+  // The name beside each marker selects the campus area too. Its click area is a little
+  // larger than the text, so a short name such as "Iowa" is still easy to hit.
+  const pad = small ? 3 : 4;
+  const labelHits = groups
+    .filter((p) => p.labelBox)
+    .append('rect')
+    .attr('class', 'map-hit')
+    .attr('x', (p) => p.labelBox.x - pad)
+    .attr('y', (p) => p.labelBox.y - pad)
+    .attr('width', (p) => p.labelBox.w + pad * 2)
+    .attr('height', (p) => p.labelBox.h + pad * 2)
+    .on('click', (evt, p) => o.onSelect(p.key));
+  attachTip(labelHits, (p) => p.tip);
 }

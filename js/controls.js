@@ -135,6 +135,60 @@ export function rangeControl(root, { min, max, step, lo, hi, onChange }) {
     });
   }
 
+  // Clicking or tapping the rail moves the nearer handle to that spot, and the visitor can keep
+  // dragging from there. Which handle moves:
+  //   - a click outside the selected range moves the handle on that side
+  //     (left of the start moves the start, right of the end moves the end);
+  //   - a click inside the range moves whichever handle is closer;
+  //   - a click exactly halfway between them moves the end.
+  // The handles themselves still drag as normal.
+  const rail = root.querySelector('.range-slider');
+  const HANDLE = 22; // handle width in pixels; its center travels from 11px to width - 11px
+
+  function valueAt(clientX) {
+    const box = rail.getBoundingClientRect();
+    const usable = Math.max(1, box.width - HANDLE);
+    const frac = Math.min(1, Math.max(0, (clientX - box.left - HANDLE / 2) / usable));
+    return clamp(min + frac * (max - min));
+  }
+
+  function pickHandle(value) {
+    if (value <= lo) return 'lo';
+    if (value >= hi) return 'hi';
+    // Compare with a small tolerance, so decimal rounding cannot turn an exact tie into a win for the start.
+    return value - lo < hi - value - step / 1000 ? 'lo' : 'hi';
+  }
+
+  function moveTo(which, value) {
+    if (which === 'lo') lo = Math.min(value, hi);
+    else hi = Math.max(value, lo);
+    paint();
+  }
+
+  let dragging = null;
+  rail.addEventListener('pointerdown', (evt) => {
+    // Presses on a handle are left to the browser's own slider behaviour.
+    if (evt.button !== 0 || evt.target === sliderLo || evt.target === sliderHi) return;
+    const value = valueAt(evt.clientX);
+    dragging = pickHandle(value);
+    moveTo(dragging, value);
+    emit();
+    rail.setPointerCapture(evt.pointerId);
+    // Keyboard focus follows, so the arrow keys fine-tune the handle that just moved.
+    (dragging === 'lo' ? sliderLo : sliderHi).focus({ preventScroll: true });
+    evt.preventDefault();
+  });
+  rail.addEventListener('pointermove', (evt) => {
+    if (!dragging) return;
+    moveTo(dragging, valueAt(evt.clientX));
+    emit();
+  });
+  const stop = () => {
+    dragging = null;
+  };
+  rail.addEventListener('pointerup', stop);
+  rail.addEventListener('pointercancel', stop);
+
   paint();
   return {
     set(newLo, newHi) {
