@@ -21,3 +21,4 @@ Style preferences:
 - For bold text use font weight 600, not 700.
 - The top bar has no bottom border.
 - Icons come from Lucide. The logo is the chart-column-increasing icon in the text color, with no background.
+- Rectangular buttons and form controls use a 6px corner radius.

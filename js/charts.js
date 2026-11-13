@@ -111,7 +111,7 @@ const tooltip = (() => {
   function hide() {
     if (el) el.hidden = true;
   }
-  return { show, move, hide };
+  return { show, move, hide, isHidden: () => !el || el.hidden };
 })();
 
 // Adds hover and tap tooltips to a D3 selection. `contentFn(d)` returns {title, rows, note}.
@@ -122,7 +122,15 @@ function attachTip(selection, contentFn) {
       const content = contentFn(d);
       if (content) tooltip.show(evt, content);
     })
-    .on('pointermove', (evt) => tooltip.move(evt))
+    .on('pointermove', (evt, d) => {
+      // Scrolling hides the tooltip. If the pointer then moves within the same mark, bring it back.
+      if (tooltip.isHidden()) {
+        const content = contentFn(d);
+        if (content) tooltip.show(evt, content);
+      } else {
+        tooltip.move(evt);
+      }
+    })
     .on('pointerleave', (evt) => {
       // After a tap, keep the tooltip until the visitor taps somewhere else.
       if (evt.pointerType !== 'touch') tooltip.hide();
@@ -286,9 +294,9 @@ function columnPath(x, y0, y1, w) {
 // Layout shared by the charts that list one row per city or campus area.
 function rowLayout(rows, width, valueWidth) {
   const natural = maxWidth(rows, (r) => r.label, (r) => (r.cls && r.cls !== 'quiet' ? F_LABEL_KEY : F_LABEL)) + 14;
-  // When the labels would take more than about a third of the width (long names on a phone),
-  // each label moves to its own line above its mark.
-  const narrow = natural > width * 0.36;
+  // Labels sit beside the marks when that leaves enough room to draw them. On a narrow screen
+  // (or with long value labels) each label moves to its own line above its mark instead.
+  const narrow = width - natural - valueWidth < 120;
   const labelW = narrow ? 0 : natural;
   return {
     narrow,
@@ -352,10 +360,12 @@ export function rankedRows(body, width, o) {
 
   const svg = startSvg(body, width, height, o.ariaLabel);
   bottomAxis(svg, x, { top, bottom, width, format: o.xFormat, title: o.xTitle, count });
+  const zero = Math.round(x(0)) + 0.5;
+  // The zero line goes in before the labels, so label text is never crossed by it.
+  svg.append('line').attr('class', 'baseline').attr('x1', zero).attr('x2', zero).attr('y1', top).attr('y2', bottom);
   drawRowHits(svg, rows, layout, top, width);
   drawRowLabels(svg, rows, layout, top);
 
-  const zero = Math.round(x(0)) + 0.5;
   const barH = 16;
   const marks = svg.append('g').attr('class', 'marks');
   rows.forEach((r, i) => {
@@ -383,7 +393,6 @@ export function rankedRows(body, width, o) {
       .attr('dominant-baseline', 'central')
       .text(r.display);
   });
-  svg.append('line').attr('class', 'baseline').attr('x1', zero).attr('x2', zero).attr('y1', top).attr('y2', bottom);
 }
 
 // ---------- Dumbbell: two values per row, joined by a line ----------

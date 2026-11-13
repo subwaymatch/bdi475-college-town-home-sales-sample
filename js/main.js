@@ -36,6 +36,31 @@ function initTheme() {
   });
 }
 
+// ---------- Show which section the visitor is in ----------
+
+function initNavHighlight() {
+  const links = Array.from(document.querySelectorAll('.site-nav a'));
+  const sections = links.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+  if (!sections.length || !('IntersectionObserver' in window)) return;
+  const visible = new Set();
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) visible.add(entry.target.id);
+        else visible.delete(entry.target.id);
+      }
+      // When two sections are on screen, the one further down the page is the current one.
+      const current = sections.map((s) => s.id).filter((id) => visible.has(id)).pop();
+      for (const link of links) {
+        if (link.getAttribute('href') === `#${current}`) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      }
+    },
+    { rootMargin: '-45% 0px -50% 0px' }
+  );
+  sections.forEach((section) => observer.observe(section));
+}
+
 // ---------- Headline numbers at the top of the page ----------
 
 function monthYear(isoDate) {
@@ -100,6 +125,7 @@ async function start() {
     initExplore(rows, mapData);
     renderInsights(rows);
     document.fonts.ready.then(redrawAll);
+    initNavHighlight();
   } catch (err) {
     console.error(err);
     status.classList.add('is-error');

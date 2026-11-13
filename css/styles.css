@@ -30,7 +30,7 @@
   --accent-ink: #b8451a;
   --hover: rgba(22, 24, 29, 0.05);
 
-  --radius-sm: 8px;
+  --radius-sm: 6px;
   --wrap: 1120px;
   --header-h: 60px;
 }
@@ -203,6 +203,11 @@ a {
 .site-nav a:hover {
   background: var(--hover);
   color: var(--ink);
+}
+
+.site-nav a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .theme-toggle {
@@ -418,7 +423,14 @@ a {
 @media (min-width: 980px) {
   .question-body {
     grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
-    gap: 40px;
+    gap: 56px;
+  }
+
+  /* The written answer stays in view while a tall chart scrolls past. */
+  .question-body > .answer,
+  .question-body > .prose {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
   }
 }
 
@@ -498,16 +510,19 @@ a {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 0 1 190px;
+  flex: 1 1 150px;
+  max-width: 240px;
   min-width: 0;
 }
 
 .field--wide {
-  flex: 1 1 280px;
+  flex: 2 1 280px;
+  max-width: 460px;
 }
 
 .field--narrow {
-  flex: 0 1 150px;
+  flex: 1 1 130px;
+  max-width: 180px;
 }
 
 .field label,
@@ -671,8 +686,10 @@ a {
   margin-top: 20px;
 }
 
-.filters-grid .field {
+.filters-grid .field,
+.cmp-pickers .field {
   flex: none;
+  max-width: none;
 }
 
 .filters-ranges {
@@ -1068,7 +1085,7 @@ a {
 .segmented button {
   padding: 6px 14px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--ink-2);
   font: inherit;
@@ -1340,6 +1357,10 @@ a {
   fill: var(--ink-2);
   font-size: 13px;
   font-weight: 400;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 .row-label.is-small { font-size: 12px; }
@@ -1350,15 +1371,29 @@ a {
   font-size: 12px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 .value-label.is-small { font-size: 11px; }
 .value-label.is-key { fill: var(--ink); font-weight: 600; }
 .value-label.is-empty { fill: var(--muted); font-weight: 400; }
 
+/* Marks and text let the pointer through to the hit areas beneath them,
+   so a tooltip shows whether the pointer is on a bar, its label or the space beside it. */
+.chart-body .marks,
+.chart-body svg text,
+.baseline,
+.grid,
+.marker-line {
+  pointer-events: none;
+}
+
 .hit { fill: transparent; }
 .hit:hover { fill: var(--hover); }
-.hit-line { stroke: transparent; stroke-width: 18; }
+.hit-line { stroke: transparent; stroke-width: 18; pointer-events: stroke; }
 
 /* ---------- Tooltip ---------- */
 
@@ -1514,10 +1549,23 @@ a {
   padding: 0 0 56px;
   color: var(--muted);
   font-size: 0.85rem;
+  line-height: 1.6;
 }
 
 .site-footer strong {
   color: var(--ink-2);
+}
+
+.site-footer p + p {
+  margin-top: 8px;
+}
+
+.site-footer a {
+  color: var(--ink-2);
+}
+
+.site-footer a:hover {
+  color: var(--ink);
 }
 
 /* ---------- Smaller screens ---------- */

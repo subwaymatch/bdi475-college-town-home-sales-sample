@@ -37,3 +37,10 @@ A dated entry for each time I worked with the coding agent (Claude Code on the w
 - **Asked:** "What serif font and weight are you using in the hero section?" then "For bold styles, can you use a lighter weight? Perhaps 600 instead of 700?" and "Remove the bottom border from the top bar."
 - **Agent produced:** The Insights section (P1 on blank dates, with a chart and table computed from the data, and a draft of P2), the Data and methods section, this log and the README. Bold text now uses weight 600 and the top bar has no border.
 - **Checked or changed:** The agent checked the P1 numbers against pandas. The P2 text is a draft based on what happened in this session, for me to review and rewrite in my own words.
+
+## 2026-11-13: Design round 3, phone layout and chart details
+
+- **Asked:** "Can you slightly decrease the border radius of rounded corner buttons?"
+- **Agent produced:** Buttons and form controls with a 6px corner radius. On its own review of phone and dark-mode screenshots, the agent also changed how bar charts fit a narrow screen, kept chart labels readable where they cross gridlines, made the written answer stay in view beside a tall chart on wide screens, highlighted the current section in the top bar, and added links to the footer.
+- **Checked or changed:** The agent re-ran its number checks against pandas, its screen-width check at six widths, and a test that hovers over the marks of every chart.
+- **What the agent got wrong:** Tooltips did not appear when the pointer was directly on a bar or dot, only on the empty space beside it, because the marks were drawn on top of the invisible hover areas. The agent found this when its hover test timed out, and fixed it so marks and labels let the pointer through.
