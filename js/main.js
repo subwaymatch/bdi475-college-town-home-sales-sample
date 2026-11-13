@@ -4,6 +4,7 @@ import * as A from './analysis.js';
 import * as F from './format.js';
 import { redrawAll } from './charts.js';
 import { renderFixedQuestions } from './questions.js';
+import { renderLiveQuestions } from './questions-live.js';
 
 const d3 = window.d3;
 const DATA_URL = 'data/site_sales.csv';
@@ -69,6 +70,7 @@ async function start() {
     status.hidden = true;
     renderOverview(rows);
     renderFixedQuestions(rows);
+    renderLiveQuestions(rows);
     document.fonts.ready.then(redrawAll);
   } catch (err) {
     console.error(err);

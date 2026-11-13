@@ -171,7 +171,10 @@ export function figure(host, { title, subtitle, legend } = {}) {
     setTitle: (text) => (titleEl.textContent = text),
     setSubtitle: (text) => (subEl.textContent = text),
     setLegend,
-    setTable: (columns, rows) => dataTable(tableHost, columns, rows),
+    setTable: (columns, rows) => {
+      details.hidden = !rows.length;
+      dataTable(tableHost, columns, rows);
+    },
   };
 }
 
