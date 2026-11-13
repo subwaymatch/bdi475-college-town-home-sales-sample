@@ -16,3 +16,4 @@ Rules:
 Style preferences:
 - Write small labels, kickers and subtitles in normal sentence case, never in all caps (for example "Answer", not "ANSWER").
 - Don't add extra letter spacing to normal-case text.
+- No card designs: don't put sections, charts or numbers in boxes with borders, background fills or shadows. Use one plain page background, and separate sections with spacing and alignment.

@@ -859,10 +859,12 @@ export function campusMap(body, width, o) {
 
   const maxN = d3.max(o.places, (p) => p.n) || 1;
   const radius = d3.scaleSqrt().domain([0, maxN]).range([small ? 3.5 : 5, small ? 9 : 15]);
+  const dotR = (p) => (p.n ? radius(p.n) : small ? 3.5 : 5);
   const placed = o.places
     .map((p) => ({ ...p, xy: projection([p.lon, p.lat]) }))
     .filter((p) => p.xy)
-    .sort((a, b) => b.n - a.n);
+    // Larger circles are drawn first so smaller ones stay visible, and the selected one goes on top.
+    .sort((a, b) => (a.selected ? 1 : 0) - (b.selected ? 1 : 0) || b.n - a.n);
 
   const groups = svg
     .append('g')
@@ -871,20 +873,45 @@ export function campusMap(body, width, o) {
     .join('g')
     .attr('class', (p) => `map-place${p.selected ? ' is-selected' : ''}${p.n ? '' : ' is-empty'}${o.anySelected && !p.selected ? ' is-dimmed' : ''}`)
     .attr('transform', (p) => `translate(${p.xy[0]},${p.xy[1]})`);
-  groups.append('circle').attr('class', 'map-dot').attr('r', (p) => (p.n ? radius(p.n) : small ? 4 : 5));
+  groups.append('circle').attr('class', 'map-dot').attr('r', (p) => dotR(p));
+
+  // Place each label on the first side of its marker where it fits: inside the map,
+  // clear of the other markers and of labels already placed. Selected and larger places
+  // choose first. A label with no free spot is left off (its name is still in the tooltip
+  // and on the buttons below the map).
+  const font = small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`;
+  const lineH = small ? 12 : 14;
+  const taken = placed.map((p) => ({ x0: p.xy[0] - dotR(p), x1: p.xy[0] + dotR(p), y0: p.xy[1] - dotR(p), y1: p.xy[1] + dotR(p), owner: p.key }));
+  const overlaps = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+  const order = placed.slice().sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0) || b.n - a.n);
+  for (const p of order) {
+    const w = textWidth(p.label, font);
+    const r = dotR(p) + (small ? 3 : 5);
+    const [cx, cy] = p.xy;
+    const boxes = {
+      right: { x0: cx + r, x1: cx + r + w, y0: cy - lineH / 2, y1: cy + lineH / 2 },
+      left: { x0: cx - r - w, x1: cx - r, y0: cy - lineH / 2, y1: cy + lineH / 2 },
+      top: { x0: cx - w / 2, x1: cx + w / 2, y0: cy - r - lineH, y1: cy - r },
+      bottom: { x0: cx - w / 2, x1: cx + w / 2, y0: cy + r, y1: cy + r + lineH },
+    };
+    const sides = [p.labelSide || 'right', 'right', 'left', 'top', 'bottom'];
+    p.side = sides.find((side) => {
+      const box = boxes[side];
+      if (box.x0 < 0 || box.x1 > width || box.y0 < 0 || box.y1 > height) return false;
+      return !taken.some((other) => other.owner !== p.key && overlaps(box, other));
+    });
+    if (p.side) taken.push({ ...boxes[p.side], owner: p.key });
+  }
   groups
+    .filter((p) => p.side)
     .append('text')
     .attr('class', `map-label${small ? ' is-small' : ''}`)
     .each(function (p) {
-      const r = (p.n ? radius(p.n) : 5) + (small ? 3 : 5);
-      const labelW = textWidth(p.label, small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`);
-      // A label that would run off the right edge of the map moves to the left of its marker.
-      let side = p.labelSide || 'right';
-      if (side === 'right' && p.xy[0] + r + labelW > width - 2) side = 'left';
+      const r = dotR(p) + (small ? 3 : 5);
       const text = d3.select(this).text(p.label);
-      if (side === 'left') text.attr('x', -r).attr('text-anchor', 'end').attr('dominant-baseline', 'central');
-      else if (side === 'top') text.attr('y', -r - 2).attr('text-anchor', 'middle');
-      else if (side === 'bottom') text.attr('y', r + 10).attr('text-anchor', 'middle');
+      if (p.side === 'left') text.attr('x', -r).attr('text-anchor', 'end').attr('dominant-baseline', 'central');
+      else if (p.side === 'top') text.attr('y', -r - 3).attr('text-anchor', 'middle');
+      else if (p.side === 'bottom') text.attr('y', r + lineH - 3).attr('text-anchor', 'middle');
       else text.attr('x', r).attr('text-anchor', 'start').attr('dominant-baseline', 'central');
     });
   // A generous invisible circle makes each campus easy to tap.

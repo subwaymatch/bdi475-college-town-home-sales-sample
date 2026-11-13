@@ -263,7 +263,7 @@ function renderQ4(rows) {
     rankedRows(fig.body, width, {
       rows: chartRows,
       xFormat: (v) => F.signedPct(v).replace('.0%', '%'),
-      xTitle: 'Change in median sale price, 2024 to 2025',
+      xTitle: 'Change in median sale price',
       ariaLabel: 'Bar chart of the percent change in median sale price from 2024 to 2025 for each campus area',
     })
   );
@@ -388,7 +388,7 @@ function renderQ6(rows) {
       rows: chartRows,
       mark: 'lollipop',
       xFormat: (v) => `${F.one(v)}%`,
-      xTitle: 'Total annual property tax as a percent of total sale price',
+      xTitle: 'Property tax as a percent of sale price',
       ariaLabel: 'Dot chart of property tax as a percent of sale price for each campus area',
     })
   );
