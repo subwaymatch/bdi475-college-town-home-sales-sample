@@ -529,7 +529,7 @@ export function initExplore(rows, mapDataPromise) {
     { label: 'Number of sales', value: (s) => s.n, format: F.int },
     { label: 'Median sale price', value: (s) => s.medianPrice, format: F.usd },
     { label: 'Median days on market', value: (s) => s.medianDom, format: F.days },
-    { label: 'Median price per square foot', value: (s) => s.medianPpsf, format: (v) => (v == null ? F.usd(null) : F.usd(v)) },
+    { label: 'Median price per sq ft', value: (s) => s.medianPpsf, format: (v) => (v == null ? F.usd(null) : F.usd(v)) },
     { label: 'Median distance to campus', value: (s) => s.medianMiles, format: F.miles },
   ];
 
