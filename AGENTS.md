@@ -12,3 +12,13 @@ Rules:
 - After each change, tell me what you changed and how I can check it in my browser, on the live site or in the pull request. I don't install tools, run code or start a local server on my own computer, so don't ask me to.
 - Never put passwords, API keys or other secrets in any file.
 - .github/workflows/pages.yml publishes the repository's files to GitHub Pages, as they are, each time main is pushed. Only add a build step to it if we move to a framework that needs one.
+
+Style preferences:
+- Write small labels, kickers and subtitles in normal sentence case, never in all caps (for example "Answer", not "ANSWER").
+- Don't add extra letter spacing to normal-case text.
+- No card designs: don't put sections, charts or numbers in boxes with borders, background fills or shadows. Use one plain page background, and separate sections with spacing and alignment.
+- Light mode uses a pure white page background.
+- For bold text use font weight 600, not 700.
+- The top bar has no bottom border.
+- Icons come from Lucide. The logo is the chart-column-increasing icon in the text color, with no background.
+- Rectangular buttons and form controls use a 6px corner radius.

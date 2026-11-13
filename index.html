@@ -1,31 +1,482 @@
 <!DOCTYPE html>
-<!-- A placeholder from the Home Sales template. Replace this file with your site's first page. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Under construction</title>
-  <!-- An empty icon, so the browser doesn't log an error looking for favicon.ico -->
-  <link rel="icon" href="data:,">
-  <style>
-    :root { color-scheme: light dark; }
-    body {
-      max-width: 40rem;
-      margin: 0 auto;
-      padding: 3rem 1rem;
-      font-family: system-ui, sans-serif;
-      line-height: 1.5;
-    }
-    footer { margin-top: 3rem; font-size: 0.875rem; opacity: 0.75; }
-  </style>
+  <title>College-Town Home Sales Analysis</title>
+  <meta name="description" content="An analysis of home sales around university campuses: prices, days on market, property tax and distance to campus, by city and campus area.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316181d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cstyle%3E@media (prefers-color-scheme: dark)%7Bpath%7Bstroke:%23f0efec%7D%7D%3C/style%3E%3Cpath d='M13 17V9'/%3E%3Cpath d='M18 17V5'/%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E">
+  <script>
+    // Set the theme before the page paints, so there is no flash of the wrong mode.
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('theme'); } catch (err) {}
+      var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = saved || (dark ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <main>
-    <h1>This site is under construction</h1>
-    <p>It will show findings from the College-town home sales dataset.</p>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top">
+        <svg class="icon brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17v-3"/></svg>
+        <span>College-Town Home Sales</span>
+      </a>
+      <nav class="site-nav" aria-label="Sections">
+        <a href="#questions">Questions</a>
+        <a href="#explore">Explore</a>
+        <a href="#insights">Insights</a>
+        <a href="#methods">Methods</a>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <span class="theme-toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap">
+        <p class="eyebrow">Home sales analysis</p>
+        <h1>What homes sell for, and how fast, around America's college campuses</h1>
+        <p class="lead">Ten questions about prices, days on market, property tax and distance to campus, answered from completed home sales near university campuses across the United States.</p>
+
+        <div class="load-status" id="load-status" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          <div>
+            <p class="load-title">Loading the sales data</p>
+            <p class="load-text">This takes a few seconds the first time.</p>
+          </div>
+        </div>
+
+        <dl class="hero-stats" data-needs-data hidden>
+          <div><dt>Home sales</dt><dd data-stat="rows"></dd></div>
+          <div><dt>Cities</dt><dd data-stat="cities"></dd></div>
+          <div><dt>Campus areas</dt><dd data-stat="campuses"></dd></div>
+          <div><dt>Median sale price</dt><dd data-stat="median"></dd></div>
+        </dl>
+        <p class="hero-note" data-needs-data hidden>Sales closed from <span data-stat="firstSale"></span> to <span data-stat="lastSale"></span>. The median uses sales from $10,000 to $5,000,000.</p>
+      </div>
+    </section>
+
+    <section class="section" id="questions" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">The analysis</p>
+          <h2>Ten questions</h2>
+          <p class="section-intro">Questions 1 to 6 always use the full dataset. Questions 7 to 10 have their own settings, and their answers and charts update as you change them. Unless a question says otherwise, prices are limited to sales from $10,000 to $5,000,000, a "city" is a city and state together, and a "campus area" is the nearest university.</p>
+          <nav class="jump" aria-label="Jump to a question">
+            <a href="#q1">Q1</a><a href="#q2">Q2</a><a href="#q3">Q3</a><a href="#q4">Q4</a><a href="#q5">Q5</a><a href="#q6">Q6</a><a href="#q7">Q7</a><a href="#q8">Q8</a><a href="#q9">Q9</a><a href="#q10">Q10</a>
+          </nav>
+        </header>
+
+        <article class="question" id="q1">
+          <header class="question-head">
+            <span class="q-badge">Q1</span>
+            <h3>Which city has the highest median sale price?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q1-answer"></div>
+            <figure id="q1-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q2">
+          <header class="question-head">
+            <span class="q-badge">Q2</span>
+            <h3>Which city's mean sale price is furthest above its median?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q2-answer"></div>
+            <figure id="q2-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q3">
+          <header class="question-head">
+            <span class="q-badge">Q3</span>
+            <h3>Which cities change rank by mean sale price once the price rule is applied?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q3-answer"></div>
+            <figure id="q3-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q4">
+          <header class="question-head">
+            <span class="q-badge">Q4</span>
+            <h3>How did the median sale price change from 2024 to 2025 in each campus area?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q4-answer"></div>
+            <figure id="q4-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q5">
+          <header class="question-head">
+            <span class="q-badge">Q5</span>
+            <h3>Which campus areas sell slowest and fastest, by median days on market?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q5-answer"></div>
+            <figure id="q5-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q6">
+          <header class="question-head">
+            <span class="q-badge">Q6</span>
+            <h3>Which campus areas have the highest and lowest property tax burden?</h3>
+          </header>
+          <div class="question-body">
+            <div class="answer" id="q6-answer"></div>
+            <figure id="q6-chart"></figure>
+          </div>
+        </article>
+        <div class="divider" id="live-questions">
+          <h3 class="divider-title">Questions with your own settings</h3>
+          <p>Change a setting and the answer, chart and table are recalculated from the data.</p>
+        </div>
+
+        <article class="question" id="q7">
+          <header class="question-head">
+            <span class="q-badge">Q7</span>
+            <h3>For a chosen number of bedrooms, which city has the lowest median sale price?</h3>
+          </header>
+          <div class="controls" role="group" aria-label="Settings for question 7">
+            <div class="field">
+              <label for="q7-beds">Bedrooms (exactly)</label>
+              <select class="select" id="q7-beds"></select>
+            </div>
+          </div>
+          <div class="question-body">
+            <div class="answer" id="q7-answer" aria-live="polite"></div>
+            <figure id="q7-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q8">
+          <header class="question-head">
+            <span class="q-badge">Q8</span>
+            <h3>For a chosen price range, which city has the shortest median days on market?</h3>
+          </header>
+          <div class="controls" role="group" aria-label="Settings for question 8">
+            <div class="field">
+              <label for="q8-min">Minimum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="q8-min" type="text" inputmode="numeric" autocomplete="off" placeholder="10,000"></div>
+            </div>
+            <div class="field">
+              <label for="q8-max">Maximum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="q8-max" type="text" inputmode="numeric" autocomplete="off" placeholder="5,000,000"></div>
+            </div>
+            <p class="controls-hint">Both ends are included, so a maximum of $400,000 includes a $400,000 sale.</p>
+          </div>
+          <p class="scope-note" id="q8-note" hidden></p>
+          <div class="question-body">
+            <div class="answer" id="q8-answer" aria-live="polite"></div>
+            <figure id="q8-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q9">
+          <header class="question-head">
+            <span class="q-badge">Q9</span>
+            <h3>For a chosen city and year, how many sales were recorded in each month?</h3>
+          </header>
+          <div class="controls" role="group" aria-label="Settings for question 9">
+            <div class="field">
+              <label for="q9-city">City</label>
+              <select class="select" id="q9-city"></select>
+            </div>
+            <div class="field">
+              <label for="q9-year">Year</label>
+              <select class="select" id="q9-year"></select>
+            </div>
+          </div>
+          <div class="question-body">
+            <div class="answer" id="q9-answer" aria-live="polite"></div>
+            <figure id="q9-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="q10">
+          <header class="question-head">
+            <span class="q-badge">Q10</span>
+            <h3>For a chosen campus area, budget and number of bedrooms, how far from campus are the homes?</h3>
+          </header>
+          <div class="controls" role="group" aria-label="Settings for question 10">
+            <div class="field field--wide">
+              <label for="q10-campus">Campus area</label>
+              <select class="select" id="q10-campus"></select>
+            </div>
+            <div class="field">
+              <label for="q10-budget">Maximum budget</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="q10-budget" type="text" inputmode="numeric" autocomplete="off" placeholder="5,000,000"></div>
+            </div>
+            <div class="field field--narrow">
+              <label for="q10-beds">Minimum bedrooms</label>
+              <input class="input" id="q10-beds" type="number" min="0" step="1" inputmode="numeric" placeholder="Any">
+            </div>
+          </div>
+          <p class="scope-note" id="q10-note" hidden></p>
+          <div class="question-body">
+            <div class="answer" id="q10-answer" aria-live="polite"></div>
+            <figure id="q10-chart"></figure>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section class="section section--alt" id="explore" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Interactive</p>
+          <h2>Explore the sales</h2>
+          <p class="section-intro">Set the filters and everything in this section updates together: the key numbers, the map, the charts, the comparison and the table. The ten questions above are not affected. This section always uses sales from $10,000 to $5,000,000.</p>
+        </header>
+
+        <div class="panel filters" id="filters">
+          <h3 class="panel-title">Filters</h3>
+          <div class="filters-grid">
+            <div class="field field--span2">
+              <label for="f-campus">Campus area</label>
+              <select class="select" id="f-campus"></select>
+            </div>
+            <div class="field field--span2">
+              <label for="f-city">City</label>
+              <select class="select" id="f-city"></select>
+            </div>
+            <div class="field">
+              <label for="f-year">Year of sale</label>
+              <select class="select" id="f-year"></select>
+            </div>
+            <div class="field">
+              <label for="f-beds">Bedrooms</label>
+              <select class="select" id="f-beds"></select>
+            </div>
+            <div class="field">
+              <label for="f-pmin">Minimum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="f-pmin" type="text" inputmode="numeric" autocomplete="off" placeholder="10,000"></div>
+            </div>
+            <div class="field">
+              <label for="f-pmax">Maximum price</label>
+              <div class="input-group"><span aria-hidden="true">$</span><input class="input" id="f-pmax" type="text" inputmode="numeric" autocomplete="off" placeholder="5,000,000"></div>
+            </div>
+            <div class="field">
+              <label for="f-garage">Garage</label>
+              <select class="select" id="f-garage"></select>
+            </div>
+            <div class="field">
+              <label for="f-basement">Basement</label>
+              <select class="select" id="f-basement"></select>
+            </div>
+            <div class="field">
+              <label for="f-fireplace">Fireplace</label>
+              <select class="select" id="f-fireplace"></select>
+            </div>
+          </div>
+          <div class="filters-ranges">
+            <div class="range" id="f-miles" role="group" aria-label="Distance from campus, in miles">
+              <p class="field-label">Distance from campus, in miles</p>
+              <div class="range-slider">
+                <div class="range-track"><div class="range-fill"></div></div>
+                <input class="range-lo" type="range" aria-label="Minimum distance in miles">
+                <input class="range-hi" type="range" aria-label="Maximum distance in miles">
+              </div>
+              <div class="range-boxes">
+                <input class="input range-box-lo" type="number" inputmode="decimal" aria-label="Minimum distance in miles, exact">
+                <span>to</span>
+                <input class="input range-box-hi" type="number" inputmode="decimal" aria-label="Maximum distance in miles, exact">
+              </div>
+            </div>
+            <div class="range" id="f-built" role="group" aria-label="Year built">
+              <p class="field-label">Year built</p>
+              <div class="range-slider">
+                <div class="range-track"><div class="range-fill"></div></div>
+                <input class="range-lo" type="range" aria-label="Minimum year built">
+                <input class="range-hi" type="range" aria-label="Maximum year built">
+              </div>
+              <div class="range-boxes">
+                <input class="input range-box-lo" type="number" inputmode="decimal" aria-label="Minimum year built, exact">
+                <span>to</span>
+                <input class="input range-box-hi" type="number" inputmode="decimal" aria-label="Maximum year built, exact">
+              </div>
+            </div>
+          </div>
+          <div class="filters-foot">
+            <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
+            <div class="filters-actions">
+              <button class="btn btn--ghost" id="reset-filters" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>Reset filters</span>
+              </button>
+              <button class="btn" id="copy-link" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span class="btn-label">Copy link to this view</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-banner" id="explore-empty" hidden>
+          <div>
+            <p class="empty-title">No sales match these filters</p>
+            <p>Try widening a range or choosing "Any", or start again.</p>
+          </div>
+          <button class="btn" id="empty-reset" type="button">Reset filters</button>
+        </div>
+
+        <div class="tiles" aria-live="polite">
+          <div class="tile"><p class="tile-label">Sales</p><p class="tile-value" id="tile-n"></p><p class="tile-note" id="tile-n-note"></p></div>
+          <div class="tile"><p class="tile-label">Median sale price</p><p class="tile-value" id="tile-price"></p><p class="tile-note" id="tile-price-note"></p></div>
+          <div class="tile"><p class="tile-label">Median days on market</p><p class="tile-value" id="tile-dom"></p><p class="tile-note" id="tile-dom-note"></p></div>
+          <div class="tile"><p class="tile-label">Median price per sq ft</p><p class="tile-value" id="tile-ppsf"></p><p class="tile-note" id="tile-ppsf-note"></p></div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="panel panel--wide"><figure id="map-figure"></figure></div>
+          <div class="panel panel--side" id="compare">
+            <h3 class="panel-title">Compare two places</h3>
+            <p class="panel-sub">Choose any two campus areas or cities.</p>
+            <div class="cmp-pickers">
+              <div class="field">
+                <label for="cmp-a">First place</label>
+                <select class="select" id="cmp-a"></select>
+              </div>
+              <div class="field">
+                <label for="cmp-b">Second place</label>
+                <select class="select" id="cmp-b"></select>
+              </div>
+            </div>
+            <div class="cmp" id="compare-result" aria-live="polite"></div>
+            <p class="panel-note" id="compare-note"></p>
+          </div>
+          <div class="panel panel--wide"><figure id="trend-figure"></figure></div>
+          <div class="panel panel--side"><figure id="dist-figure"></figure></div>
+          <div class="panel panel--full">
+            <div class="panel-head">
+              <div>
+                <h3 class="panel-title">Results by place</h3>
+                <p class="panel-sub" id="table-caption"></p>
+              </div>
+              <div class="segmented" role="group" aria-label="Rows of the table">
+                <button type="button" data-table-by="city" aria-pressed="true">Cities</button>
+                <button type="button" data-table-by="campus" aria-pressed="false">Campus areas</button>
+              </div>
+            </div>
+            <div id="explore-table"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="insights" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Reflection</p>
+          <h2>Insights</h2>
+          <p class="section-intro">Two short notes: one data-quality problem and what it does to the results, and what it was like to build this analysis with a coding agent.</p>
+        </header>
+
+        <article class="question" id="p1">
+          <header class="question-head">
+            <span class="q-badge">P1</span>
+            <h3>Data quality: a blank date is not zero days</h3>
+          </header>
+          <div class="question-body">
+            <div class="prose" id="p1-text"></div>
+            <figure id="p1-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="p2">
+          <header class="question-head">
+            <span class="q-badge">P2</span>
+            <h3>Working with a coding agent</h3>
+          </header>
+          <div class="prose prose--columns">
+            <p>I built this site by directing Claude Code, a coding agent, in plain English instead of writing pandas or SQL in a Jupyter notebook. The work felt different in three ways.</p>
+            <p><span class="answer-lead">The speed went to the hard parts.</span> In a notebook, the ten answers are about ten group-by statements, and I could write those myself. The agent wrote them quickly too, but it also built what a notebook does not give me: charts that redraw when someone types a new budget, a map that filters the page, links that reopen the same view, and a dark mode. By hand, that part would have taken me far longer than the analysis.</p>
+            <p><span class="answer-lead">Checking replaced typing.</span> I did not read every line of code, so the numbers had to be proven another way. The agent ran each calculation twice, once in the site's own code and once in pandas on the original file, and all ten questions matched, including Q7 to Q10 at several settings. That second pass also surfaced a detail a quick notebook cell can hide: Q5 has a four-way tie for the fastest campus area, and a one-line "which is lowest" lookup would have named only one.</p>
+            <p><span class="answer-lead">The mistakes were about design, not arithmetic.</span> The first version set small labels in all caps, wrapped every section in a boxed card and ran off the side of a phone screen. I caught the first two by looking at the page. The agent caught the third with its own screen-width check.</p>
+            <p>I prefer the agent for building something public and interactive. For a first look at a new dataset I still prefer a notebook, because seeing each intermediate table is how I learn what is in the data.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="methods" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Reference</p>
+          <h2>Data and methods</h2>
+          <p class="section-intro">The rules behind every number on this page. Each number is calculated in your browser from the dataset when the page loads, and nothing is typed in by hand.</p>
+        </header>
+
+        <div class="methods">
+          <div class="method">
+            <h3>Price rule</h3>
+            <p>Unless a question says otherwise, only sales with a sale price from $10,000 to $5,000,000, inclusive, are used. This is a scope rule, not a claim that other prices are wrong. It leaves out <span data-stat="belowMin"></span> sales below $10,000 and <span data-stat="aboveMax"></span> above $5,000,000, keeping <span data-stat="valid"></span> of <span data-stat="rows"></span>. Q2 uses all rows, Q3 compares both, and Q9 counts all rows with a sale date.</p>
+          </div>
+          <div class="method">
+            <h3>Days on market</h3>
+            <p>Contract date minus list date, in days. Only sales with both dates are used (<span data-stat="domRows"></span> of all rows). A blank date is treated as unknown, never as zero. The closing date is not used, because closing comes later: a median of <span data-stat="closeDays"></span> after the contract.</p>
+          </div>
+          <div class="method">
+            <h3>Places and dates</h3>
+            <p>A city is the city and state together (<span data-stat="cities"></span> values). A campus area is the nearest university, from the dataset's university column (<span data-stat="campuses"></span> values). Year and month come from the sale date. Charts use short campus names, and the full names are in the written answers, tooltips and tables.</p>
+          </div>
+          <div class="method">
+            <h3>Medians, ties and small groups</h3>
+            <p>The median is used unless a question asks for the mean. With an even number of sales it is the average of the two middle values. When places tie, all of them are reported. Where an answer rests on fewer than 10 sales, the site says so, and counts are shown beside medians.</p>
+          </div>
+          <div class="method">
+            <h3>Missing and impossible values</h3>
+            <p>Blank cells stay blank. Garage, basement and fireplace filters offer Unknown as its own choice, separate from No. Price per square foot uses only sales with a living area above zero. A range filter keeps sales with a blank value until the range is narrowed. Q6 uses only tax amounts above $0 and below 10% of the sale price, which removes entries such as the largest tax amount in the data, <span data-stat="maxTax"></span>.</p>
+          </div>
+          <div class="method">
+            <h3>Rows are never merged</h3>
+            <p>Each row is one sale, identified by its listing ID. Sales that share a street address are kept, because they are often separate units in one building. The property type column is not used, because the data description sheet warns it is unreliable.</p>
+          </div>
+          <div class="method">
+            <h3>The map</h3>
+            <p>The dataset has no campus coordinates, so each campus area is placed at the median latitude and longitude of its own sales. State outlines come from the US Census Bureau through the us-atlas project.</p>
+          </div>
+          <div class="method">
+            <h3>How the numbers were checked</h3>
+            <p>The site reads a smaller copy of the dataset with the same rows and only the columns it needs, made by a script in the repository. The answers to all ten questions were recalculated separately in pandas from the original file and matched.</p>
+          </div>
+          <div class="method">
+            <h3>Chart types</h3>
+            <p>Bar charts (Q1, Q4, Q7), a dumbbell chart (Q2), a slope chart (Q3), a box plot (Q5), dot charts (Q6, Q8), a column chart (Q9) and a histogram (Q10). The Explore section adds a map and a line chart. Charts are drawn with D3, icons are from Lucide, and the typefaces are Source Serif 4 and Inter.</p>
+          </div>
+          <div class="method method--wide">
+            <h3>Dataset</h3>
+            <p>College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026. Values are as reported by the collection source and were not verified against county records.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
-  <footer>
-    <p>Data: College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.</p>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><strong>Data:</strong> College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.</p>
+      <p>How the numbers are calculated is explained in <a href="#methods">Data and methods</a>. The code is on <a href="https://github.com/subwaymatch/bdi475-college-town-home-sales-sample">GitHub</a>.</p>
+    </div>
   </footer>
+
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
