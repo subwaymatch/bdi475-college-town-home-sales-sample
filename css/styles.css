@@ -1210,40 +1210,39 @@ a {
 
 .methods {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 48px 56px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  max-width: 68ch;
   margin-top: 56px;
 }
 
 .method h3 {
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.35;
 }
 
 .method p {
-  margin-top: 8px;
+  margin-top: 10px;
   color: var(--ink-2);
-  font-size: 0.925rem;
+  font-size: 1.0625rem;
+  line-height: 1.7;
 }
 
-.method--wide {
-  grid-column: 1 / -1;
-  max-width: 70ch;
-}
-
-@media (max-width: 980px) {
+@media (max-width: 560px) {
   .methods {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 620px) {
-  .methods {
-    grid-template-columns: minmax(0, 1fr);
     gap: 32px;
+    margin-top: 40px;
+  }
+
+  .method h3 {
+    font-size: 1.125rem;
+  }
+
+  .method p {
+    font-size: 1rem;
   }
 }
 
