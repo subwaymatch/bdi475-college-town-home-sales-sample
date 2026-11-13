@@ -440,3 +440,49 @@ export function medianLocation(list) {
     lon: median(list.filter((r) => r.lon != null).map((r) => r.lon)),
   };
 }
+
+// ---------- Insights: what happens if a blank date is treated as zero days ----------
+
+// For each city (valid prices): how many sales lack a list or contract date, the median days on
+// market using only sales with both dates (the rule this site uses), and what the median would be
+// if every blank were wrongly counted as 0 days.
+export function blankDatesEffect(rows) {
+  const valid = validRows(rows);
+  const describe = (list) => {
+    const both = list.filter((r) => r.dom != null).map((r) => r.dom);
+    const asZero = list.map((r) => (r.dom == null ? 0 : r.dom));
+    return {
+      n: list.length,
+      nBoth: both.length,
+      missingPct: list.length ? ((list.length - both.length) / list.length) * 100 : null,
+      median: both.length ? median(both) : null,
+      mean: mean(both),
+      medianIfZero: list.length ? median(asZero) : null,
+    };
+  };
+  const cities = Array.from(groupBy(valid, (r) => r.city), ([city, list]) => ({ city, ...describe(list) }));
+  // Rank 1 = fastest (lowest median). Equal medians share a rank.
+  const rankAscending = (key) => {
+    const sorted = cities.slice().sort((a, b) => a[key] - b[key]);
+    const ranks = new Map();
+    sorted.forEach((c, i) => ranks.set(c.city, i > 0 && sorted[i - 1][key] === c[key] ? ranks.get(sorted[i - 1].city) : i + 1));
+    return ranks;
+  };
+  const rank = rankAscending('median');
+  const rankIfZero = rankAscending('medianIfZero');
+  for (const c of cities) {
+    c.rank = rank.get(c.city);
+    c.rankIfZero = rankIfZero.get(c.city);
+    c.drop = c.median - c.medianIfZero;
+  }
+  cities.sort((a, b) => b.missingPct - a.missingPct);
+  return {
+    overall: describe(valid),
+    cities,
+    mostMissing: cities[0],
+    leastMissing: cities[cities.length - 1],
+    // The city whose rank would improve the most under the wrong rule.
+    mostDistorted: cities.slice().sort((a, b) => b.rank - b.rankIfZero - (a.rank - a.rankIfZero) || b.drop - a.drop)[0],
+    fastestIfZero: extremes(cities, (c) => c.medianIfZero, 'min'),
+  };
+}

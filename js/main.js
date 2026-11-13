@@ -6,6 +6,7 @@ import { redrawAll } from './charts.js';
 import { renderFixedQuestions } from './questions.js';
 import { renderLiveQuestions } from './questions-live.js';
 import { initExplore } from './explore.js';
+import { renderInsights } from './insights.js';
 
 const d3 = window.d3;
 const DATA_URL = 'data/site_sales.csv';
@@ -48,6 +49,13 @@ function renderOverview(rows) {
     cities: F.int(A.allCities(rows).length),
     campuses: F.int(A.allCampuses(rows).length),
     median: F.usd(A.median(A.validRows(rows).map((r) => r.price))),
+    valid: F.int(A.validRows(rows).length),
+    belowMin: F.int(rows.filter((r) => r.price != null && r.price < A.PRICE_MIN).length),
+    aboveMax: F.int(rows.filter((r) => r.price != null && r.price > A.PRICE_MAX).length),
+    domRows: F.int(rows.filter((r) => r.dom != null).length),
+    maxTax: F.usd(Math.max(...rows.filter((r) => r.tax != null).map((r) => r.tax))),
+    // Median days from contract to closing, for sales with both dates.
+    closeDays: F.days(A.median(rows.filter((r) => r.contract && r.sale).map((r) => Math.round((Date.parse(r.sale) - Date.parse(r.contract)) / 86400000)))),
     firstSale: monthYear(saleDates[0]),
     lastSale: monthYear(saleDates[saleDates.length - 1]),
   };
@@ -90,6 +98,7 @@ async function start() {
     renderFixedQuestions(rows);
     renderLiveQuestions(rows);
     initExplore(rows, mapData);
+    renderInsights(rows);
     document.fonts.ready.then(redrawAll);
   } catch (err) {
     console.error(err);

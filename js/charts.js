@@ -4,9 +4,9 @@
 const d3 = window.d3;
 
 const FONT = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
-const F_LABEL = `500 13px ${FONT}`;
-const F_LABEL_KEY = `700 13px ${FONT}`;
-const F_VALUE = `600 12px ${FONT}`;
+const F_LABEL = `400 13px ${FONT}`;
+const F_LABEL_KEY = `600 13px ${FONT}`;
+const F_VALUE = `600 12px ${FONT}`; // measured at the heavier weight, so labels always fit
 const F_TICK = `400 12px ${FONT}`;
 
 let measureCtx;
@@ -492,8 +492,8 @@ export function boxRows(body, width, o) {
 export function slope(body, width, o) {
   const rows = o.rows;
   const narrow = width < 520;
-  const font = narrow ? `500 12px ${FONT}` : F_LABEL;
-  const fontKey = narrow ? `700 12px ${FONT}` : F_LABEL_KEY;
+  const font = narrow ? `400 12px ${FONT}` : F_LABEL;
+  const fontKey = narrow ? `600 12px ${FONT}` : F_LABEL_KEY;
   const fontFor = (r) => (r.cls && r.cls !== 'quiet' ? fontKey : font);
   let labelText = (r, rank) => `${rank}. ${r.label}`;
   let sideW = maxWidth(rows, (r) => labelText(r, Math.max(r.left, r.right)), fontFor) + 16;
@@ -879,7 +879,7 @@ export function campusMap(body, width, o) {
   // clear of the other markers and of labels already placed. Selected and larger places
   // choose first. A label with no free spot is left off (its name is still in the tooltip
   // and on the buttons below the map).
-  const font = small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`;
+  const font = small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`; // measured at the selected (heavier) weight
   const lineH = small ? 12 : 14;
   const taken = placed.map((p) => ({ x0: p.xy[0] - dotR(p), x1: p.xy[0] + dotR(p), y0: p.xy[1] - dotR(p), y1: p.xy[1] + dotR(p), owner: p.key }));
   const overlaps = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;

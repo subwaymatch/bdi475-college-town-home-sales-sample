@@ -17,3 +17,7 @@ Style preferences:
 - Write small labels, kickers and subtitles in normal sentence case, never in all caps (for example "Answer", not "ANSWER").
 - Don't add extra letter spacing to normal-case text.
 - No card designs: don't put sections, charts or numbers in boxes with borders, background fills or shadows. Use one plain page background, and separate sections with spacing and alignment.
+- Light mode uses a pure white page background.
+- For bold text use font weight 600, not 700.
+- The top bar has no bottom border.
+- Icons come from Lucide. The logo is the chart-column-increasing icon in the text color, with no background.

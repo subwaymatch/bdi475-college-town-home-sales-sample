@@ -17,7 +17,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -32,6 +32,8 @@
       <nav class="site-nav" aria-label="Sections">
         <a href="#questions">Questions</a>
         <a href="#explore">Explore</a>
+        <a href="#insights">Insights</a>
+        <a href="#methods">Methods</a>
       </nav>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
         <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
@@ -373,6 +375,93 @@
               </div>
             </div>
             <div id="explore-table"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="insights" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Reflection</p>
+          <h2>Insights</h2>
+          <p class="section-intro">Two short notes: one data-quality problem and what it does to the results, and what it was like to build this analysis with a coding agent.</p>
+        </header>
+
+        <article class="question" id="p1">
+          <header class="question-head">
+            <span class="q-badge">P1</span>
+            <h3>Data quality: a blank date is not zero days</h3>
+          </header>
+          <div class="question-body">
+            <div class="prose" id="p1-text"></div>
+            <figure id="p1-chart"></figure>
+          </div>
+        </article>
+
+        <article class="question" id="p2">
+          <header class="question-head">
+            <span class="q-badge">P2</span>
+            <h3>Working with a coding agent</h3>
+          </header>
+          <div class="prose prose--columns">
+            <p>I built this site by directing Claude Code, a coding agent, in plain English instead of writing pandas or SQL in a Jupyter notebook. The work felt different in three ways.</p>
+            <p><span class="answer-lead">The speed went to the hard parts.</span> In a notebook, the ten answers are about ten group-by statements, and I could write those myself. The agent wrote them quickly too, but it also built what a notebook does not give me: charts that redraw when someone types a new budget, a map that filters the page, links that reopen the same view, and a dark mode. By hand, that part would have taken me far longer than the analysis.</p>
+            <p><span class="answer-lead">Checking replaced typing.</span> I did not read every line of code, so the numbers had to be proven another way. The agent ran each calculation twice, once in the site's own code and once in pandas on the original file, and all ten questions matched, including Q7 to Q10 at several settings. That second pass also surfaced a detail a quick notebook cell can hide: Q5 has a four-way tie for the fastest campus area, and a one-line "which is lowest" lookup would have named only one.</p>
+            <p><span class="answer-lead">The mistakes were about design, not arithmetic.</span> The first version set small labels in all caps, wrapped every section in a boxed card and ran off the side of a phone screen. I caught the first two by looking at the page. The agent caught the third with its own screen-width check.</p>
+            <p>I prefer the agent for building something public and interactive. For a first look at a new dataset I still prefer a notebook, because seeing each intermediate table is how I learn what is in the data.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="methods" data-needs-data hidden>
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">Reference</p>
+          <h2>Data and methods</h2>
+          <p class="section-intro">The rules behind every number on this page. Each number is calculated in your browser from the dataset when the page loads, and nothing is typed in by hand.</p>
+        </header>
+
+        <div class="methods">
+          <div class="method">
+            <h3>Price rule</h3>
+            <p>Unless a question says otherwise, only sales with a sale price from $10,000 to $5,000,000, inclusive, are used. This is a scope rule, not a claim that other prices are wrong. It leaves out <span data-stat="belowMin"></span> sales below $10,000 and <span data-stat="aboveMax"></span> above $5,000,000, keeping <span data-stat="valid"></span> of <span data-stat="rows"></span>. Q2 uses all rows, Q3 compares both, and Q9 counts all rows with a sale date.</p>
+          </div>
+          <div class="method">
+            <h3>Days on market</h3>
+            <p>Contract date minus list date, in days. Only sales with both dates are used (<span data-stat="domRows"></span> of all rows). A blank date is treated as unknown, never as zero. The closing date is not used, because closing comes later: a median of <span data-stat="closeDays"></span> after the contract.</p>
+          </div>
+          <div class="method">
+            <h3>Places and dates</h3>
+            <p>A city is the city and state together (<span data-stat="cities"></span> values). A campus area is the nearest university, from the dataset's university column (<span data-stat="campuses"></span> values). Year and month come from the sale date. Charts use short campus names, and the full names are in the written answers, tooltips and tables.</p>
+          </div>
+          <div class="method">
+            <h3>Medians, ties and small groups</h3>
+            <p>The median is used unless a question asks for the mean. With an even number of sales it is the average of the two middle values. When places tie, all of them are reported. Where an answer rests on fewer than 10 sales, the site says so, and counts are shown beside medians.</p>
+          </div>
+          <div class="method">
+            <h3>Missing and impossible values</h3>
+            <p>Blank cells stay blank. Garage, basement and fireplace filters offer Unknown as its own choice, separate from No. Price per square foot uses only sales with a living area above zero. A range filter keeps sales with a blank value until the range is narrowed. Q6 uses only tax amounts above $0 and below 10% of the sale price, which removes entries such as the largest tax amount in the data, <span data-stat="maxTax"></span>.</p>
+          </div>
+          <div class="method">
+            <h3>Rows are never merged</h3>
+            <p>Each row is one sale, identified by its listing ID. Sales that share a street address are kept, because they are often separate units in one building. The property type column is not used, because the data description sheet warns it is unreliable.</p>
+          </div>
+          <div class="method">
+            <h3>The map</h3>
+            <p>The dataset has no campus coordinates, so each campus area is placed at the median latitude and longitude of its own sales. State outlines come from the US Census Bureau through the us-atlas project.</p>
+          </div>
+          <div class="method">
+            <h3>How the numbers were checked</h3>
+            <p>The site reads a smaller copy of the dataset with the same rows and only the columns it needs, made by a script in the repository. The answers to all ten questions were recalculated separately in pandas from the original file and matched.</p>
+          </div>
+          <div class="method">
+            <h3>Chart types</h3>
+            <p>Bar charts (Q1, Q4, Q7), a dumbbell chart (Q2), a slope chart (Q3), a box plot (Q5), dot charts (Q6, Q8), a column chart (Q9) and a histogram (Q10). The Explore section adds a map and a line chart. Charts are drawn with D3, icons are from Lucide, and the typefaces are Source Serif 4 and Inter.</p>
+          </div>
+          <div class="method method--wide">
+            <h3>Dataset</h3>
+            <p>College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026. Values are as reported by the collection source and were not verified against county records.</p>
           </div>
         </div>
       </div>

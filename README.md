@@ -1,51 +1,73 @@
-# [Your site's title]
+# College-Town Home Sales
 
-## Start here (delete this section before you submit)
-
-This repository is your starting point for the Home Sales case. It already holds the dataset, its description sheet, project instructions for your AI coding agent, and outlines of the README and agent log that the case asks for.
-
-1. **Turn on GitHub Pages.** In this repository, open **Settings**, then **Pages**. Under "Build and deployment," set **Source** to **GitHub Actions**. GitHub may suggest workflows to add. Skip them: this repository already has one, `.github/workflows/pages.yml`.
-2. **Publish for the first time.** Open the **Actions** tab, choose **Publish site to GitHub Pages** in the sidebar, click **Run workflow**, then click **Run workflow** again to confirm. If the tab already shows a failed run from when you created the repository, that's expected: Pages wasn't turned on yet. When the new run shows a green check, your site is at `https://your-username.github.io/your-repo-name/`. It shows a placeholder page until you replace `index.html`.
-
-    From then on, every push to the main branch publishes the site within a few minutes. If the live site doesn't show a change, open the **Actions** tab. A red X means the publish failed, and the run's log says why.
-3. **Open the repository in your AI coding agent.** Its project instructions are in `AGENTS.md`. If your agent reads its instructions from a file with a different name, check its documentation and copy `AGENTS.md` to that name. Add to the instructions as you learn what your agent needs.
-4. **Read `docs/data_description_sheet.md`** before you ask the agent for any analysis.
-5. **Build in small steps,** as the setup guide describes. Add an entry to `AGENT_LOG.md` each time you work with the agent.
-6. **Fill in every section below** before you submit.
-
-| Path | What it is |
-|---|---|
-| `index.html` | A placeholder page. Replace it with your site. |
-| `data/college_town_home_sales.csv` | The dataset, version 1.0: 35,442 rows. Your site reads this file. |
-| `data/college_town_home_sales.xlsx`, `.sqlite`, `.duckdb`, `.parquet` | The same data in Excel, SQLite, DuckDB and Parquet formats, with identical values |
-| `docs/data_description_sheet.md` | What every column means, and five problems in the data |
-| `AGENTS.md` | Project instructions for your AI coding agent |
-| `AGENT_LOG.md` | Your agent log |
-| `scripts/` | Scripts that make smaller data files for the site |
-| `.github/workflows/pages.yml` | Publishes the site to GitHub Pages each time you push to main. It publishes your files as they are. If you switch to a framework that needs a build step, have your agent update it. |
-
-Don't edit any of the five dataset files. Your site needs only the CSV file. The other formats make it easier to check numbers a second way, for example with a pivot table in Excel or a SQL query on the SQLite file. In SQLite and DuckDB, the table is named `home_sales`.
-
-## What this site is for
-
-_Replace this line with your site's question and audience, or a short description of the site._
+An analysis of 35,442 completed home sales around 11 university campuses, in 18 cities across the United States. It is the final project for BDI 475.
 
 ## Live site
 
-https://your-username.github.io/your-repo-name/
+https://subwaymatch.github.io/bdi475-college-town-home-sales-sample/
+
+## What this site is for
+
+The site answers ten business questions about college-town housing, for a reader who wants to compare markets: which cities are most expensive, where homes sell fastest, where property tax is heaviest, and how far from campus a given budget buys.
+
+| Section | What it holds |
+|---|---|
+| **Questions** | Q1 to Q10, each with a written answer, a chart and a table of the same numbers. Q1 to Q6 use the full dataset. Q7 to Q10 have their own settings (bedrooms, price range, city and year, campus area and budget) and recalculate when a setting changes. |
+| **Explore** | Filters for campus area, city, year, bedrooms, price, distance from campus, year built, garage, basement and fireplace. Key numbers, a map of campus areas, two charts, a side-by-side comparison and a sortable table all follow the filters. The filter settings are saved in the page address, so a copied link opens the same view. |
+| **Insights** | P1: what happens to days on market if a blank date is treated as zero. P2: what it was like to build the analysis with a coding agent. |
+| **Data and methods** | The rules behind every number. |
+
+The site has a light and a dark mode, and works on desktop, tablet and phone screens.
 
 ## Data notes
 
-_Replace this line. Say which rows you left out and why, and how each figure on the site is defined. "Five things that will bite you" in the description sheet lists the problems to cover._
+Every number on the site is calculated in the browser from the data when the page loads. The rules:
 
-## Tools we used
+- **Price rule.** Unless a question says otherwise, only sales from $10,000 to $5,000,000, inclusive, are used. That leaves out 40 sales below $10,000 and 31 above $5,000,000. Q2 uses all rows, Q3 compares both, and Q9 counts all rows with a sale date.
+- **Days on market** is `contract_date` minus `list_date`, in days, using only rows that have both dates. A blank date is treated as unknown, never as zero.
+- **City** means city and state together. **Campus area** means the `university` column. **Year** and **month** come from `sale_date`.
+- **Median** is used unless a question asks for the mean. Ties are all reported, and medians are shown with their number of sales.
+- **Missing values** stay missing. The garage, basement and fireplace filters offer Unknown as its own choice. Price per square foot uses only rows with a living area above zero.
+- **Property tax (Q6)** uses rows with a valid price and a tax amount above $0 and below 10% of the sale price.
+- **Rows are never merged.** `listing_id` is the key, and sales that share a street address are kept. The `home_type` column is not used.
+- **The map** places each campus area at the median latitude and longitude of its sales, because the dataset has no campus coordinates.
 
-_Replace this line with your AI coding agent or agents, and any libraries and other tools you used._
+The "Five things that will bite you" in `docs/data_description_sheet.md` are handled as follows: blank dates (the days-on-market rule above), repeated addresses (rows are never merged), impossible prices (the price rule), unreliable `home_type` (not used), and impossible values (the living-area and tax rules above).
+
+### The smaller data file
+
+The site loads `data/site_sales.csv` instead of the full 9 MB file. It holds every row of `data/college_town_home_sales.csv`, in the same order, with only the 17 columns the site uses. No value is changed. To make it again, run this from the repository root (Python 3, no extra packages):
+
+```
+python scripts/make_site_data.py
+```
+
+### How the numbers were checked
+
+The calculations are in `js/analysis.js`. The answers to all ten questions were recalculated separately in pandas from the original CSV file and matched, including Q7 to Q10 at several different settings.
+
+## Tools used
+
+- **Coding agent:** Claude Code on the web. The agent planned the site, wrote the code and checked the numbers. I directed the work and the design.
+- **Charts and map:** [D3](https://d3js.org) 7, with US state outlines from [us-atlas](https://github.com/topojson/us-atlas), both stored in `vendor/`.
+- **Icons:** [Lucide](https://lucide.dev).
+- **Typefaces:** Source Serif 4 and Inter, from Google Fonts.
+- **Hosting:** GitHub Pages. The site is plain HTML, CSS and JavaScript with no build step.
+
+| Path | What it is |
+|---|---|
+| `index.html` | The page |
+| `css/styles.css` | All styles, including the light and dark themes |
+| `js/analysis.js` | Every calculation on the site |
+| `js/charts.js` | The chart and map drawing code |
+| `js/questions.js`, `js/questions-live.js` | Q1 to Q6, and Q7 to Q10 |
+| `js/explore.js` | The Explore section |
+| `js/insights.js` | The Insights chart and numbers |
+| `data/site_sales.csv` | The smaller data file the site loads |
+| `scripts/make_site_data.py` | Makes `data/site_sales.csv` |
+| `docs/data_description_sheet.md` | What every column means |
+| `AGENT_LOG.md` | A log of the work with the coding agent |
 
 ## Citation
 
 College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.
-
-## Who did what
-
-_For teams: replace this line with each member's name and what they did. If you worked alone, delete this section._

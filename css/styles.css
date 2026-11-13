@@ -87,7 +87,7 @@ h1,
 h2,
 h3 {
   font-family: var(--font-head);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0;
@@ -96,6 +96,11 @@ h3 {
 
 p {
   margin: 0;
+}
+
+strong,
+b {
+  font-weight: 600;
 }
 
 a {
@@ -152,7 +157,6 @@ a {
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
   -webkit-backdrop-filter: saturate(1.4) blur(10px);
-  border-bottom: 1px solid var(--line);
 }
 
 .header-inner {
@@ -167,7 +171,7 @@ a {
   align-items: center;
   gap: 10px;
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.975rem;
   letter-spacing: -0.01em;
   text-decoration: none;
@@ -282,7 +286,7 @@ a {
 .hero-stats dd {
   margin: 2px 0 0;
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -397,7 +401,7 @@ a {
   background: var(--ink);
   color: var(--bg);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .question-head h3 {
@@ -446,7 +450,7 @@ a {
 
 .answer strong {
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .answer ul {
@@ -604,14 +608,14 @@ a {
 .panel-title {
   font-family: var(--font-body);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0;
   line-height: 1.35;
 }
 
 .panel .chart-title {
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .filters {
@@ -886,7 +890,7 @@ a {
 .tile-value {
   margin-top: 2px;
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -919,9 +923,9 @@ a {
 .map-place.is-selected .map-dot { fill: var(--accent); fill-opacity: 1; }
 .map-place.is-empty .map-dot { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; }
 .map-place:hover .map-dot { fill-opacity: 1; stroke: var(--ink); }
-.map-label { fill: var(--ink-2); font-size: 12px; font-weight: 600; paint-order: stroke; stroke: var(--surface-2); stroke-width: 3px; stroke-linejoin: round; }
+.map-label { fill: var(--ink-2); font-size: 12px; font-weight: 500; paint-order: stroke; stroke: var(--surface-2); stroke-width: 3px; stroke-linejoin: round; }
 .map-label.is-small { font-size: 10.5px; }
-.map-place.is-selected .map-label { fill: var(--ink); font-weight: 700; }
+.map-place.is-selected .map-label { fill: var(--ink); font-weight: 600; }
 .map-hit { fill: transparent; cursor: pointer; }
 
 .map-loading {
@@ -968,7 +972,7 @@ a {
 .chip.is-selected {
   border-color: var(--accent);
   background: var(--accent-soft);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .chip.is-selected .chip-count {
@@ -1012,7 +1016,7 @@ a {
   align-items: flex-start;
   gap: 8px;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.35;
 }
 
@@ -1034,7 +1038,7 @@ a {
 
 .cmp-value {
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
@@ -1160,6 +1164,64 @@ a {
   box-shadow: inset 0 -2px 0 var(--accent);
 }
 
+/* ---------- Insights and methods ---------- */
+
+.prose {
+  color: var(--ink-2);
+}
+
+.prose p + p {
+  margin-top: 14px;
+}
+
+.prose strong {
+  color: var(--ink);
+}
+
+.prose--columns {
+  max-width: 70ch;
+  margin-top: 32px;
+}
+
+.methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px 56px;
+  margin-top: 56px;
+}
+
+.method h3 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.method p {
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-size: 0.925rem;
+}
+
+.method--wide {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+}
+
+@media (max-width: 980px) {
+  .methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .methods {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
 /* ---------- Charts ---------- */
 
 .chart {
@@ -1271,27 +1333,27 @@ a {
 }
 
 .tick { font-variant-numeric: tabular-nums; }
-.tick.is-key { fill: var(--ink); font-weight: 700; }
+.tick.is-key { fill: var(--ink); font-weight: 600; }
 .tick.is-small { font-size: 11px; }
 
 .row-label {
   fill: var(--ink-2);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .row-label.is-small { font-size: 12px; }
-.row-label.is-key { fill: var(--ink); font-weight: 700; }
+.row-label.is-key { fill: var(--ink); font-weight: 600; }
 
 .value-label {
   fill: var(--ink-2);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .value-label.is-small { font-size: 11px; }
-.value-label.is-key { fill: var(--ink); font-weight: 700; }
+.value-label.is-key { fill: var(--ink); font-weight: 600; }
 .value-label.is-empty { fill: var(--muted); font-weight: 400; }
 
 .hit { fill: transparent; }
@@ -1319,7 +1381,7 @@ a {
 
 .tooltip-title {
   margin-bottom: 6px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .tooltip dl {
@@ -1418,7 +1480,7 @@ a {
 }
 
 .data-table tbody th {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .data-table .num {
@@ -1428,7 +1490,7 @@ a {
 
 .data-table tr.is-key th,
 .data-table tr.is-key td {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* ---------- Empty state ---------- */
