@@ -8,7 +8,7 @@ These files are copied into the repository, unchanged, so the site does not depe
 | `topojson-client.min.js` | [TopoJSON Client](https://github.com/topojson/topojson-client), reads the map file | 3.1.0 | ISC, Copyright 2012-2019 Michael Bostock |
 | `us-states-10m.json` | US state outlines from [us-atlas](https://github.com/topojson/us-atlas) (`states-10m.json`), based on US Census Bureau cartographic boundary files | 3.0.1 | ISC, Copyright 2013-2019 Michael Bostock |
 
-The icons on the site (the chart logo, the light and dark mode icons, and the reset, link and sort icons) are from [Lucide](https://lucide.dev) 1.72.0, ISC License, Copyright (c) 2026 Lucide Icons and Contributors. Their SVG paths are written directly into `index.html` and `js/explore.js`.
+The icons on the site (the chart icon in the browser tab, the light and dark mode icons, and the reset, link and sort icons) are from [Lucide](https://lucide.dev) 1.72.0, ISC License, Copyright (c) 2026 Lucide Icons and Contributors. Their SVG paths are written directly into `index.html` and `js/explore.js`.
 
 ISC License: Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
