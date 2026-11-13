@@ -55,6 +55,12 @@ export function signedPct(value) {
   return `${sign}${dec1.format(Math.abs(value))}%`;
 }
 
+// A number of days for a table cell: 7, 25, 23.5 (a decimal only when the value is not a whole number)
+export function dayCount(value) {
+  if (value == null) return DASH;
+  return Number.isInteger(value) ? int0.format(value) : dec1.format(value);
+}
+
 // 7 days, 23.5 days, 1 day
 export function days(value) {
   if (value == null) return DASH;

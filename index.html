@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>College-Town Home Sales Analysis</title>
   <meta name="description" content="An analysis of home sales around university campuses: prices, days on market, property tax and distance to campus, by city and campus area.">
+  <!-- Link previews for messaging apps and social sites -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="College-Town Home Sales">
+  <meta property="og:title" content="College-Town Home Sales Analysis">
+  <meta property="og:description" content="What homes sell for, and how fast, around America's college campuses: ten questions answered from completed home sales, with charts, a map and filters.">
+  <meta property="og:url" content="https://subwaymatch.github.io/bdi475-college-town-home-sales-sample/">
+  <meta property="og:image" content="https://subwaymatch.github.io/bdi475-college-town-home-sales-sample/assets/social-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The top of the College-Town Home Sales site: its title and four headline numbers.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="College-Town Home Sales Analysis">
+  <meta name="twitter:description" content="What homes sell for, and how fast, around America's college campuses: ten questions answered from completed home sales, with charts, a map and filters.">
+  <meta name="twitter:image" content="https://subwaymatch.github.io/bdi475-college-town-home-sales-sample/assets/social-preview.png">
+  <meta name="twitter:image:alt" content="The top of the College-Town Home Sales site: its title and four headline numbers.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316181d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cstyle%3E@media (prefers-color-scheme: dark)%7Bpath%7Bstroke:%23f0efec%7D%7D%3C/style%3E%3Cpath d='M13 17V9'/%3E%3Cpath d='M18 17V5'/%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E">
   <script>
     // Set the theme before the page paints, so there is no flash of the wrong mode.
@@ -28,7 +43,11 @@
       <a class="brand" href="#top">
         <span>College-Town Home Sales</span>
       </a>
-      <nav class="site-nav" aria-label="Sections">
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open the section menu">
+        <svg class="icon icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+        <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="Sections">
         <a href="#questions">Questions</a>
         <a href="#explore">Explore</a>
         <a href="#insights">Insights</a>
@@ -448,7 +467,7 @@
           </div>
           <div class="method">
             <h3>The map</h3>
-            <p>The dataset has no campus coordinates, so each campus area is placed at the median latitude and longitude of its own sales. State outlines come from the US Census Bureau through the us-atlas project.</p>
+            <p>The dataset has no campus coordinates, so each campus area is placed at the median latitude and longitude of its own sales. Where two markers would overlap, they are moved apart just far enough to be selected, and a thin line points back to the true spot. State outlines come from the US Census Bureau through the us-atlas project.</p>
           </div>
           <div class="method">
             <h3>How the numbers were checked</h3>

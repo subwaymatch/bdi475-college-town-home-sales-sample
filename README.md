@@ -63,6 +63,7 @@ The calculations are in `js/analysis.js`. The answers to all ten questions were 
 | `js/questions.js`, `js/questions-live.js` | Q1 to Q6, and Q7 to Q10 |
 | `js/explore.js` | The Explore section |
 | `js/insights.js` | The Insights chart and numbers |
+| `assets/social-preview.png` | The image shown when a link to the site is shared |
 | `data/site_sales.csv` | The smaller data file the site loads |
 | `scripts/make_site_data.py` | Makes `data/site_sales.csv` |
 | `docs/data_description_sheet.md` | What every column means |

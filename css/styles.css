@@ -203,6 +203,11 @@ a {
   font-weight: 600;
 }
 
+/* The menu button only appears on smaller screens (see the 760px rules). */
+.nav-toggle {
+  display: none;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -949,6 +954,9 @@ a {
 .map-label.is-small { font-size: 10.5px; }
 .map-place.is-selected .map-label { fill: var(--ink); font-weight: 600; }
 .map-hit { fill: transparent; cursor: pointer; }
+/* Thin lines that link a moved marker to its true location, or a label to its marker. */
+.map-leader { stroke: var(--muted); stroke-width: 1; pointer-events: none; }
+.map-anchor { fill: var(--ink-2); pointer-events: none; }
 .map-place:hover .map-label { fill: var(--ink); }
 
 .map-loading {
@@ -1573,6 +1581,86 @@ a {
     font-size: 0.9375rem;
   }
 
+  /* Compact header: one row with the title, a menu button and an icon-only theme button.
+     The four section links open as a small menu under the header. */
+  :root {
+    --header-h: 56px;
+  }
+
+  .header-inner {
+    position: relative;
+    gap: 8px;
+  }
+
+  .brand {
+    margin-right: auto;
+  }
+
+  .nav-toggle,
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--axis);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+
+  .nav-toggle:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+  }
+
+  .nav-toggle .icon-close,
+  .nav-toggle[aria-expanded="true"] .icon-menu {
+    display: none;
+  }
+
+  .nav-toggle[aria-expanded="true"] .icon-close {
+    display: block;
+  }
+
+  .theme-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% - 2px);
+    right: 24px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 200px;
+    margin: 0;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--overlay);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .site-nav.is-open {
+    display: flex;
+  }
+
+  .site-nav a {
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+
   .hero {
     padding: 56px 0 16px;
   }
@@ -1639,44 +1727,8 @@ a {
     padding: 0 16px;
   }
 
-  /* Two rows on a phone: the title and theme toggle, then the section links. */
-  .header-inner {
-    flex-wrap: wrap;
-    gap: 0 10px;
-    padding-top: 8px;
-  }
-
-  .brand {
-    margin-right: auto;
-  }
-
   .site-nav {
-    order: 3;
-    width: 100%;
-    margin: 4px -9px 0;
-    justify-content: space-between;
-  }
-
-  .site-nav a {
-    padding: 7px 9px;
-    font-size: 0.85rem;
-  }
-
-  :root {
-    --header-h: 88px;
-  }
-
-  .theme-toggle-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .theme-toggle {
-    padding: 8px;
+    right: 16px;
   }
 
   .lead {

@@ -32,7 +32,20 @@ function initQ7(rows) {
   const select = byId('q7-beds');
   let beds = url.readNumber('q7beds');
   if (!bedOptions.includes(beds)) beds = DEFAULT;
-  fillSelect(select, bedOptions.map((b) => ({ value: b, label: `${b} ${b === 1 ? 'bedroom' : 'bedrooms'}` })), beds);
+  // Every bedroom count in the data can be chosen, because Q7 asks about an exact count.
+  // Counts with fewer than 10 sales in the price range (some are likely data-entry errors,
+  // such as 30 or more bedrooms) are listed separately, each with its number of sales.
+  const RARE = 10;
+  const salesByBeds = A.groupBy(A.validRows(rows).filter((r) => r.beds != null), (r) => r.beds);
+  const salesFor = (b) => (salesByBeds.get(b) || []).length;
+  const bedLabel = (b) => `${b} ${b === 1 ? 'bedroom' : 'bedrooms'}`;
+  const common = bedOptions.filter((b) => salesFor(b) >= RARE);
+  const rare = bedOptions.filter((b) => salesFor(b) < RARE);
+  const menu = common.map((b) => ({ value: b, label: bedLabel(b) }));
+  if (rare.length) {
+    menu.push({ group: `Fewer than ${RARE} sales`, options: rare.map((b) => ({ value: b, label: `${bedLabel(b)} (${F.sales(salesFor(b))})` })) });
+  }
+  fillSelect(select, menu, beds);
 
   const fig = figure(byId('q7-chart'), {});
   let draw = null;
@@ -161,7 +174,7 @@ function initQ8(rows) {
       fig.setTable(
         [
           { label: 'City', value: (c) => c.city },
-          { label: 'Median days on market', value: (c) => (c.median == null ? F.one(null) : F.one(c.median)), numeric: true },
+          { label: 'Median days on market', value: (c) => F.dayCount(c.median), numeric: true },
           { label: 'Sales used', value: (c) => F.int(c.n), numeric: true },
         ],
         result.cities.map((c) => ({ ...c, isKey: shortNames.has(c.city) }))

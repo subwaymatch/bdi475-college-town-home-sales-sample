@@ -314,8 +314,8 @@ function renderQ5(rows) {
       title: c.campus,
       rows: [
         ['Median', F.days(c.median)],
-        ['Middle half', `${F.one(c.q1)} to ${F.days(c.q3)}`],
-        ['10th to 90th percentile', `${F.one(c.p10)} to ${F.days(c.p90)}`],
+        ['Middle half', `${F.dayCount(c.q1)} to ${F.days(c.q3)}`],
+        ['10th to 90th percentile', `${F.dayCount(c.p10)} to ${F.days(c.p90)}`],
         ['Sales with both dates', F.int(c.n)],
       ],
     },
@@ -332,9 +332,9 @@ function renderQ5(rows) {
   fig.setTable(
     [
       { label: 'Campus area', value: (c) => c.campus },
-      { label: 'Median days', value: (c) => F.one(c.median), numeric: true },
-      { label: '25th percentile', value: (c) => F.one(c.q1), numeric: true },
-      { label: '75th percentile', value: (c) => F.one(c.q3), numeric: true },
+      { label: 'Median days', value: (c) => F.dayCount(c.median), numeric: true },
+      { label: '25th percentile', value: (c) => F.dayCount(c.q1), numeric: true },
+      { label: '75th percentile', value: (c) => F.dayCount(c.q3), numeric: true },
       { label: 'Sales used', value: (c) => F.int(c.n), numeric: true },
     ],
     campuses.map((c) => ({ ...c, isKey: slowNames.has(c.campus) || fastNames.has(c.campus) }))
