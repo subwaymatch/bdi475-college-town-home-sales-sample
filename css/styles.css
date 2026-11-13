@@ -1209,38 +1209,31 @@ a {
 .methods {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
-  max-width: 68ch;
-  margin-top: 56px;
+  gap: 32px;
+  max-width: 70ch;
+  margin-top: 48px;
 }
 
+/* Same sizes as the Insights section: 16px body text, and headings
+   as large as its bold lead-in labels ("The problem.") */
 .method h3 {
+  color: var(--ink);
   font-family: var(--font-body);
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.35;
+  line-height: 1.6;
 }
 
 .method p {
-  margin-top: 10px;
+  margin-top: 4px;
   color: var(--ink-2);
-  font-size: 1.0625rem;
-  line-height: 1.7;
 }
 
 @media (max-width: 560px) {
   .methods {
-    gap: 32px;
+    gap: 28px;
     margin-top: 40px;
-  }
-
-  .method h3 {
-    font-size: 1.125rem;
-  }
-
-  .method p {
-    font-size: 1rem;
   }
 }
 
