@@ -36,6 +36,36 @@ function initTheme() {
   });
 }
 
+// ---------- Section menu on smaller screens ----------
+
+// On narrow screens the four section links sit behind a menu button, so the header stays one row.
+function initNavMenu() {
+  const button = document.getElementById('nav-toggle');
+  const nav = document.getElementById('site-nav');
+  function setOpen(open) {
+    nav.classList.toggle('is-open', open);
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? 'Close the section menu' : 'Open the section menu');
+  }
+  button.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
+  // Choosing a section closes the menu.
+  nav.addEventListener('click', (evt) => {
+    if (evt.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Escape' && nav.classList.contains('is-open')) {
+      setOpen(false);
+      button.focus();
+    }
+  });
+  // So does a click or tap anywhere else on the page.
+  document.addEventListener('pointerdown', (evt) => {
+    if (nav.classList.contains('is-open') && !evt.target.closest('#site-nav, #nav-toggle')) setOpen(false);
+  });
+  // If the window grows back to the full header, the menu state is reset.
+  window.matchMedia('(max-width: 760px)').addEventListener('change', () => setOpen(false));
+}
+
 // ---------- Show which section the visitor is in ----------
 
 function initNavHighlight() {
@@ -107,6 +137,7 @@ async function loadMap() {
 
 async function start() {
   initTheme();
+  initNavMenu();
   const status = document.getElementById('load-status');
   const mapData = loadMap();
   mapData.catch(() => {});

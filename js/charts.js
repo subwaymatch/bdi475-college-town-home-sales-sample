@@ -869,83 +869,191 @@ export function campusMap(body, width, o) {
   const maxN = d3.max(o.places, (p) => p.n) || 1;
   const radius = d3.scaleSqrt().domain([0, maxN]).range([small ? 3.5 : 5, small ? 9 : 15]);
   const dotR = (p) => (p.n ? radius(p.n) : small ? 3.5 : 5);
+  // Every marker gets a click and tap target at least 24px across.
+  const hitR = (p) => Math.max(dotR(p) + 3, 12);
   const placed = o.places
-    .map((p) => ({ ...p, xy: projection([p.lon, p.lat]) }))
-    .filter((p) => p.xy)
-    // Larger circles are drawn first so smaller ones stay visible, and the selected one goes on top.
-    .sort((a, b) => (a.selected ? 1 : 0) - (b.selected ? 1 : 0) || b.n - a.n);
+    .map((p) => ({ ...p, anchor: projection([p.lon, p.lat]) }))
+    .filter((p) => p.anchor)
+    .map((p) => ({ ...p, x: p.anchor[0], y: p.anchor[1] }));
 
+  // 1. Move crowded markers apart. Several campuses sit close together (Illinois and Purdue are
+  //    about 70 miles apart), so their circles would overlap and be hard to select. Any two markers
+  //    whose click targets overlap are pushed apart, just far enough, along the line between them.
+  //    A thin line then links a moved marker back to its true location.
+  for (let pass = 0; pass < 400; pass += 1) {
+    let moved = false;
+    for (let a = 0; a < placed.length; a += 1) {
+      for (let b = a + 1; b < placed.length; b += 1) {
+        const p = placed[a];
+        const q = placed[b];
+        let dx = q.x - p.x;
+        let dy = q.y - p.y;
+        let dist = Math.hypot(dx, dy);
+        const need = hitR(p) + hitR(q);
+        if (dist >= need - 0.01) continue;
+        if (dist < 0.001) {
+          dx = 1;
+          dy = 0;
+          dist = 1;
+        }
+        const push = (need - dist) / 2;
+        p.x -= (dx / dist) * push;
+        p.y -= (dy / dist) * push;
+        q.x += (dx / dist) * push;
+        q.y += (dy / dist) * push;
+        moved = true;
+      }
+    }
+    for (const p of placed) {
+      p.x = Math.min(width - hitR(p), Math.max(hitR(p), p.x));
+      p.y = Math.min(height - hitR(p), Math.max(hitR(p), p.y));
+    }
+    if (!moved) break;
+  }
+  for (const p of placed) p.shift = Math.hypot(p.x - p.anchor[0], p.y - p.anchor[1]);
+
+  // 2. Place the labels. Each label can sit on any of eight sides of its marker, at three distances.
+  //    A search tries the options in order of preference and backs up when a later label has no room,
+  //    so no label overlaps another label or another marker, and none runs off the map.
+  const font = small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`; // measured at the selected (heavier) weight
+  const lineH = small ? 12 : 14;
+  const overlaps = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+  const SIDES = { right: 'E', left: 'W', top: 'N', bottom: 'S' };
+  const ALL_SIDES = ['E', 'W', 'N', 'S', 'NE', 'SE', 'NW', 'SW', 'N-start', 'N-end', 'S-start', 'S-end'];
+  for (const p of placed) {
+    // A small map uses the shortest form of a long name (the full name is on the buttons below).
+    p.text = small && p.tinyLabel ? p.tinyLabel : p.label;
+    const w = textWidth(p.text, font);
+    const h = lineH;
+    const near = dotR(p) + (small ? 3 : 5);
+    const first = SIDES[p.labelSide] || 'E';
+    const order = [first, ...ALL_SIDES.filter((side) => side !== first)];
+    p.options = [];
+    (small ? [0, 7, 15, 25, 37] : [0, 10, 22, 36]).forEach((extra, step) => {
+      const d = near + extra;
+      const k = d * 0.72;
+      const boxes = {
+        E: { x0: p.x + d, y0: p.y - h / 2 },
+        W: { x0: p.x - d - w, y0: p.y - h / 2 },
+        N: { x0: p.x - w / 2, y0: p.y - d - h },
+        S: { x0: p.x - w / 2, y0: p.y + d },
+        NE: { x0: p.x + k, y0: p.y - k - h },
+        SE: { x0: p.x + k, y0: p.y + k },
+        NW: { x0: p.x - k - w, y0: p.y - k - h },
+        SW: { x0: p.x - k - w, y0: p.y + k },
+        // Above or below the marker, starting or ending at it instead of centered on it.
+        'N-start': { x0: p.x - 4, y0: p.y - d - h },
+        'N-end': { x0: p.x + 4 - w, y0: p.y - d - h },
+        'S-start': { x0: p.x - 4, y0: p.y + d },
+        'S-end': { x0: p.x + 4 - w, y0: p.y + d },
+      };
+      for (const side of order) {
+        const b = boxes[side];
+        p.options.push({ x0: b.x0, y0: b.y0, x1: b.x0 + w, y1: b.y0 + h, far: step > 0 });
+      }
+    });
+  }
+  function solve(blockR) {
+    const blocks = placed.map((p) => ({ x0: p.x - blockR(p), x1: p.x + blockR(p), y0: p.y - blockR(p), y1: p.y + blockR(p), owner: p }));
+    const chosen = new Map();
+    const fits = (box, p) => {
+      if (box.x0 < 1 || box.x1 > width - 1 || box.y0 < 1 || box.y1 > height - 1) return false;
+      if (blocks.some((other) => other.owner !== p && overlaps(box, other))) return false;
+      const padded = { x0: box.x0 - 2, x1: box.x1 + 2, y0: box.y0 - 1, y1: box.y1 + 1 };
+      for (const other of chosen.values()) if (overlaps(padded, other)) return false;
+      return true;
+    };
+    // Markers with the fewest free spots choose first.
+    const free = new Map(placed.map((p) => [p, p.options.filter((option) => fits(option, p)).length]));
+    const order = placed.slice().sort((a, b) => free.get(a) - free.get(b) || b.n - a.n);
+    let budget = 150000;
+    const step = (i) => {
+      if (i === order.length) return true;
+      const p = order[i];
+      for (const option of p.options) {
+        budget -= 1;
+        if (budget < 0) return false;
+        if (!fits(option, p)) continue;
+        chosen.set(p, option);
+        if (step(i + 1)) return true;
+        chosen.delete(p);
+      }
+      return false;
+    };
+    if (step(0)) return chosen;
+    // No complete arrangement: label as many markers as possible, one at a time.
+    chosen.clear();
+    for (const p of order) {
+      const option = p.options.find((candidate) => fits(candidate, p));
+      if (option) chosen.set(p, option);
+    }
+    return chosen;
+  }
+  // First keep labels clear of every marker's whole click target. If the map is too small for that,
+  // keep them clear of the circles themselves.
+  let labels = solve(hitR);
+  if (labels.size < placed.length) {
+    const looser = solve((p) => dotR(p) + 2);
+    if (looser.size > labels.size) labels = looser;
+  }
+  for (const p of placed) p.labelBox = labels.get(p) || null;
+
+  // 3. Draw. Leader lines go underneath, larger circles first, and the selected marker on top.
+  const leaders = svg.append('g').attr('class', 'map-leaders');
+  // Only when the true location is no longer under the marker's own circle.
+  for (const p of placed.filter((q) => q.shift > dotR(q) + 2)) {
+    leaders.append('line').attr('class', 'map-leader').attr('x1', p.anchor[0]).attr('y1', p.anchor[1]).attr('x2', p.x).attr('y2', p.y);
+    leaders.append('circle').attr('class', 'map-anchor').attr('cx', p.anchor[0]).attr('cy', p.anchor[1]).attr('r', small ? 1.5 : 2);
+  }
   const groups = svg
     .append('g')
     .selectAll('g')
-    .data(placed)
+    .data(placed.slice().sort((a, b) => (a.selected ? 1 : 0) - (b.selected ? 1 : 0) || b.n - a.n))
     .join('g')
     .attr('class', (p) => `map-place${p.selected ? ' is-selected' : ''}${p.n ? '' : ' is-empty'}${o.anySelected && !p.selected ? ' is-dimmed' : ''}`)
-    .attr('transform', (p) => `translate(${p.xy[0]},${p.xy[1]})`);
-  groups.append('circle').attr('class', 'map-dot').attr('r', (p) => dotR(p));
-
-  // Place each label on the first side of its marker where it fits: inside the map,
-  // clear of the other markers and of labels already placed. Selected and larger places
-  // choose first. A label with no free spot is left off (its name is still in the tooltip
-  // and on the buttons below the map).
-  const font = small ? `600 10.5px ${FONT}` : `600 12px ${FONT}`; // measured at the selected (heavier) weight
-  const lineH = small ? 12 : 14;
-  const taken = placed.map((p) => ({ x0: p.xy[0] - dotR(p), x1: p.xy[0] + dotR(p), y0: p.xy[1] - dotR(p), y1: p.xy[1] + dotR(p), owner: p.key }));
-  const overlaps = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
-  const order = placed.slice().sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0) || b.n - a.n);
-  for (const p of order) {
-    const w = textWidth(p.label, font);
-    const r = dotR(p) + (small ? 3 : 5);
-    const [cx, cy] = p.xy;
-    const boxes = {
-      right: { x0: cx + r, x1: cx + r + w, y0: cy - lineH / 2, y1: cy + lineH / 2 },
-      left: { x0: cx - r - w, x1: cx - r, y0: cy - lineH / 2, y1: cy + lineH / 2 },
-      top: { x0: cx - w / 2, x1: cx + w / 2, y0: cy - r - lineH, y1: cy - r },
-      bottom: { x0: cx - w / 2, x1: cx + w / 2, y0: cy + r, y1: cy + r + lineH },
-    };
-    const sides = [p.labelSide || 'right', 'right', 'left', 'top', 'bottom'];
-    p.side = sides.find((side) => {
-      const box = boxes[side];
-      if (box.x0 < 0 || box.x1 > width || box.y0 < 0 || box.y1 > height) return false;
-      return !taken.some((other) => other.owner !== p.key && overlaps(box, other));
-    });
-    if (p.side) {
-      taken.push({ ...boxes[p.side], owner: p.key });
-      // Remember where the label sits relative to its marker, for the label's own click area.
-      const b = boxes[p.side];
-      p.labelBox = { x: b.x0 - cx, y: b.y0 - cy, w: b.x1 - b.x0, h: b.y1 - b.y0 };
-    }
+    .attr('transform', (p) => `translate(${p.x},${p.y})`);
+  // A label that sits away from its marker gets a short line back to it, from the edge of the circle.
+  for (const p of placed.filter((q) => q.labelBox && q.labelBox.far)) {
+    const tx = Math.min(p.labelBox.x1, Math.max(p.labelBox.x0, p.x)) - p.x;
+    const ty = Math.min(p.labelBox.y1, Math.max(p.labelBox.y0, p.y)) - p.y;
+    const len = Math.hypot(tx, ty);
+    const start = dotR(p) + 1;
+    p.labelLine = len > start + 3 ? { x1: (tx / len) * start, y1: (ty / len) * start, x2: tx, y2: ty } : null;
   }
   groups
-    .filter((p) => p.side)
+    .filter((p) => p.labelLine)
+    .append('line')
+    .attr('class', 'map-leader')
+    .attr('x1', (p) => p.labelLine.x1)
+    .attr('y1', (p) => p.labelLine.y1)
+    .attr('x2', (p) => p.labelLine.x2)
+    .attr('y2', (p) => p.labelLine.y2);
+  groups.append('circle').attr('class', 'map-dot').attr('r', (p) => dotR(p));
+  groups
+    .filter((p) => p.labelBox)
     .append('text')
     .attr('class', `map-label${small ? ' is-small' : ''}`)
-    .each(function (p) {
-      const r = dotR(p) + (small ? 3 : 5);
-      const text = d3.select(this).text(p.label);
-      if (p.side === 'left') text.attr('x', -r).attr('text-anchor', 'end').attr('dominant-baseline', 'central');
-      else if (p.side === 'top') text.attr('y', -r - 3).attr('text-anchor', 'middle');
-      else if (p.side === 'bottom') text.attr('y', r + lineH - 3).attr('text-anchor', 'middle');
-      else text.attr('x', r).attr('text-anchor', 'start').attr('dominant-baseline', 'central');
-    });
-  // A generous invisible circle makes each campus easy to tap.
+    .attr('x', (p) => p.labelBox.x0 - p.x)
+    .attr('y', (p) => (p.labelBox.y0 + p.labelBox.y1) / 2 - p.y)
+    .attr('dominant-baseline', 'central')
+    .text((p) => p.text);
   const hits = groups
     .append('circle')
     .attr('class', 'map-hit')
-    .attr('r', (p) => Math.max(radius(p.n) + 4, small ? 11 : 14))
+    .attr('r', (p) => hitR(p))
     .on('click', (evt, p) => o.onSelect(p.key));
   attachTip(hits, (p) => p.tip);
   // The name beside each marker selects the campus area too. Its click area is a little
   // larger than the text, so a short name such as "Iowa" is still easy to hit.
-  const pad = small ? 3 : 4;
+  const pad = small ? 2 : 3;
   const labelHits = groups
     .filter((p) => p.labelBox)
     .append('rect')
     .attr('class', 'map-hit')
-    .attr('x', (p) => p.labelBox.x - pad)
-    .attr('y', (p) => p.labelBox.y - pad)
-    .attr('width', (p) => p.labelBox.w + pad * 2)
-    .attr('height', (p) => p.labelBox.h + pad * 2)
+    .attr('x', (p) => p.labelBox.x0 - p.x - pad)
+    .attr('y', (p) => p.labelBox.y0 - p.y - pad)
+    .attr('width', (p) => p.labelBox.x1 - p.labelBox.x0 + pad * 2)
+    .attr('height', (p) => p.labelBox.y1 - p.labelBox.y0 + pad * 2)
     .on('click', (evt, p) => o.onSelect(p.key));
   attachTip(labelHits, (p) => p.tip);
 }

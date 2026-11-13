@@ -80,8 +80,8 @@ export function renderInsights(rows) {
     [
       { label: 'City', value: (c) => c.city },
       { label: 'Missing a date', value: (c) => F.pct(c.missingPct), numeric: true },
-      { label: 'Median, both dates', value: (c) => F.one(c.median), numeric: true },
-      { label: 'Median, blank as 0', value: (c) => F.one(c.medianIfZero), numeric: true },
+      { label: 'Median, both dates', value: (c) => F.dayCount(c.median), numeric: true },
+      { label: 'Median, blank as 0', value: (c) => F.dayCount(c.medianIfZero), numeric: true },
       { label: 'Rank change', value: (c) => `${ordinal(c.rank)} to ${ordinal(c.rankIfZero)}`, numeric: true },
     ],
     cities.map((c) => ({ ...c, isKey: c.city === d.city }))

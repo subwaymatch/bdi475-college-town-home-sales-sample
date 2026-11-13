@@ -52,6 +52,11 @@ const LABEL_SIDE = {
   florida: 'right',
 };
 
+// On a phone-sized map, a long campus name is shortened further so every marker can have a label.
+const TINY_LABEL = {
+  unc: 'UNC',
+};
+
 // Lucide "chevrons-up-down". The arrow for the active sort direction is highlighted in CSS.
 const SORT_ICON =
   '<svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="sort-up" d="m7 9 5-5 5 5"/><path class="sort-down" d="m7 15 5 5 5-5"/></svg>';
@@ -383,6 +388,7 @@ export function initExplore(rows, mapDataPromise) {
       n: s.n,
       selected: s.campus === state.campus,
       labelSide: LABEL_SIDE[A.campusSlug(s.campus)],
+      tinyLabel: TINY_LABEL[A.campusSlug(s.campus)],
       tip: {
         title: s.campus,
         rows: [['Matching sales', F.int(s.n)], ['Median sale price', F.usd(s.median)]],
@@ -507,7 +513,8 @@ export function initExplore(rows, mapDataPromise) {
   // ---------- Side-by-side comparison ----------
 
   const placeOptions = [
-    { group: 'Campus areas', options: campuses.map((c) => ({ value: `campus:${c}`, label: c })) },
+    // Short campus names, so the whole name fits in the menu. The full name is shown under the menu.
+    { group: 'Campus areas', options: campuses.map((c) => ({ value: `campus:${c}`, label: A.campusShort(c) })) },
     { group: 'Cities', options: cities.map((c) => ({ value: `city:${c}`, label: c })) },
   ];
   const placeValue = (place) => `${place.type}:${place.name}`;
@@ -579,7 +586,7 @@ export function initExplore(rows, mapDataPromise) {
     { key: 'n', label: () => 'Sales', value: (g) => g.n, format: (g) => F.int(g.n) },
     { key: 'price', label: () => 'Median sale price', value: (g) => g.medianPrice, format: (g) => F.usd(g.medianPrice) },
     { key: 'ppsf', label: () => 'Median price per sq ft', value: (g) => g.medianPpsf, format: (g) => (g.medianPpsf == null ? F.usd(null) : F.usd(g.medianPpsf)), optional: true },
-    { key: 'dom', label: () => 'Median days on market', value: (g) => g.medianDom, format: (g) => (g.medianDom == null ? F.one(null) : F.one(g.medianDom)) },
+    { key: 'dom', label: () => 'Median days on market', value: (g) => g.medianDom, format: (g) => F.dayCount(g.medianDom) },
     { key: 'miles', label: () => 'Median miles to campus', value: (g) => g.medianMiles, format: (g) => F.one(g.medianMiles), optional: true },
   ];
   if (!COLUMNS.some((c) => c.key === state.sort)) state.sort = 'n';
