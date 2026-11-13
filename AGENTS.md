@@ -22,3 +22,4 @@ Style preferences:
 - The top bar has no bottom border.
 - Icons come from Lucide. The site title in the top bar is text only, with no icon, left-aligned with the page content. The browser-tab icon is Lucide's chart-column-increasing.
 - Rectangular buttons and form controls use a 6px corner radius.
+- Pill buttons have no border. They use a subtle background color, and a selected pill changes only its background, never its font weight, so nothing shifts.

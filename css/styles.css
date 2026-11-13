@@ -29,6 +29,10 @@
   --link: #1d5fb0;
   --accent-ink: #b8451a;
   --hover: rgba(22, 24, 29, 0.05);
+  /* Pill buttons (question links and campus buttons): a subtle fill instead of a border. */
+  --pill: #f1f0ec;
+  --pill-hover: #e7e5df;
+  --pill-selected: #fceae3;
 
   --radius-sm: 6px;
   --wrap: 1120px;
@@ -56,6 +60,9 @@
   --link: #7db1f0;
   --accent-ink: #f08a5d;
   --hover: rgba(255, 255, 255, 0.06);
+  --pill: #262623;
+  --pill-hover: #30302d;
+  --pill-selected: #442518;
 
 }
 
@@ -200,7 +207,6 @@ a {
 
 .site-nav a[aria-current="true"] {
   color: var(--ink);
-  font-weight: 600;
 }
 
 /* The menu button only appears on smaller screens (see the 760px rules). */
@@ -369,19 +375,18 @@ a {
 .jump a {
   min-width: 46px;
   padding: 6px 12px;
-  border: 1px solid var(--axis);
   border-radius: 999px;
+  background: var(--pill);
   color: var(--ink);
   font-size: 0.85rem;
   font-weight: 600;
   text-align: center;
   text-decoration: none;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  transition: background-color 0.15s;
 }
 
 .jump a:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  background: var(--pill-hover);
 }
 
 /* ---------- Questions ---------- */
@@ -978,36 +983,31 @@ a {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  border: 1px solid var(--axis);
+  border: 0;
   border-radius: 999px;
-  background: transparent;
+  background: var(--pill);
   color: var(--ink);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition: background-color 0.15s;
 }
 
 .chip:hover {
-  border-color: var(--muted);
-  background: var(--hover);
+  background: var(--pill-hover);
 }
 
 .chip-count {
-  color: var(--muted);
+  color: var(--ink-2);
   font-size: 0.75rem;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 
-.chip.is-selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  font-weight: 600;
-}
-
-.chip.is-selected .chip-count {
-  color: var(--ink-2);
+.chip.is-selected,
+.chip.is-selected:hover {
+  background: var(--pill-selected);
 }
 
 /* Line chart extras */
